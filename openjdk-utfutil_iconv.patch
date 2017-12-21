@@ -1,0 +1,10 @@
+--- openjdk-jdk-9+181/jdk/src/jdk.jdwp.agent/share/native/libjdwp/utf_util.c	2014-10-17 08:14:57.000000000 +1100
++++ openjdk-jdk-9+181/jdk/src/jdk.jdwp.agent/share/native/libjdwp/utf_util.c	2017-08-23 16:42:45.225565381 +1000
+@@ -25,6 +25,7 @@
+ 
+ #include <stdlib.h>
+ #include <ctype.h>
++#include <iconv.h>
+ 
+ #include "jni.h"
+ 

@@ -1,0 +1,69 @@
+--- hotspot/src/cpu/zero/vm/cppInterpreter_zero.cpp.orig	2017-09-22 16:10:16.288451909 +1000
++++ hotspot/src/cpu/zero/vm/cppInterpreter_zero.cpp	2017-09-22 16:26:15.831248980 +1000
+@@ -82,6 +82,29 @@
+   return 0;
+ }
+ 
++intptr_t narrow(BasicType type, intptr_t result) {
++  // mask integer result to narrower return type.
++  switch (type) {
++    case T_BOOLEAN:
++      return result&1;
++    case T_BYTE:
++      return (intptr_t)(jbyte)result;
++    case T_CHAR:
++      return (intptr_t)(uintptr_t)(jchar)result;
++    case T_SHORT:
++      return (intptr_t)(jshort)result;
++    case T_OBJECT:  // nothing to do fall through
++    case T_ARRAY:
++    case T_LONG:
++    case T_INT:
++    case T_FLOAT:
++    case T_DOUBLE:
++    case T_VOID:
++      return result;
++    default  : ShouldNotReachHere();
++  }
++}
++
+ void CppInterpreter::main_loop(int recurse, TRAPS) {
+   JavaThread *thread = (JavaThread *) THREAD;
+   ZeroStack *stack = thread->zero_stack();
+@@ -195,8 +218,21 @@
+   stack->set_sp(stack->sp() + method->max_locals());
+ 
+   // Push our result
+-  for (int i = 0; i < result_slots; i++)
+-    stack->push(result[-i]);
++  for (int i = 0; i < result_slots; i++) {
++    // Adjust result to smaller
++    union {
++      intptr_t res;
++      jint res_jint;
++    };
++    res = result[-i];
++    if (result_slots == 1) {
++      BasicType t = method->result_type();
++      if (is_subword_type(t)) {
++        res_jint = (jint)narrow(t, res_jint);
++      }
++    }
++    stack->push(res);
++  }
+ }
+ 
+ int CppInterpreter::native_entry(Method* method, intptr_t UNUSED, TRAPS) {
+--- hotspot/src/share/vm/interpreter/bytecodeInterpreter.cpp.orig	2017-09-22 16:14:50.843666757 +1000
++++ hotspot/src/share/vm/interpreter/bytecodeInterpreter.cpp	2017-09-22 16:17:07.105211958 +1000
+@@ -576,8 +576,8 @@
+ /* 0xDC */ &&opc_default,     &&opc_default,        &&opc_default,      &&opc_default,
+ 
+ /* 0xE0 */ &&opc_default,     &&opc_default,        &&opc_default,      &&opc_default,
+-/* 0xE4 */ &&opc_default,     &&opc_fast_aldc,      &&opc_fast_aldc_w,  &&opc_return_register_finalizer,
+-/* 0xE8 */ &&opc_invokehandle,&&opc_default,        &&opc_default,      &&opc_default,
++/* 0xE4 */ &&opc_default,     &&opc_default,        &&opc_fast_aldc,    &&opc_fast_aldc_w,
++/* 0xE8 */ &&opc_return_register_finalizer,&&opc_invokehandle,        &&opc_default,      &&opc_default,
+ /* 0xEC */ &&opc_default,     &&opc_default,        &&opc_default,      &&opc_default,
+ 
+ /* 0xF0 */ &&opc_default,     &&opc_default,        &&opc_default,      &&opc_default,
