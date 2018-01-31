@@ -1,5 +1,5 @@
---- openjdk-jdk-9+181/hotspot/src/os/linux/vm/os_linux.cpp.orig	2017-11-30 14:45:15.410288339 +1100
-+++ openjdk-jdk-9+181/hotspot/src/os/linux/vm/os_linux.cpp	2017-11-30 16:43:30.944849904 +1100
+--- openjdk-jdk-9.0.4+11/hotspot/src/os/linux/vm/os_linux.cpp.orig	2017-11-30 14:45:15.410288339 +1100
++++ openjdk-jdk-9.0.4+11/hotspot/src/os/linux/vm/os_linux.cpp	2017-11-30 16:43:30.944849904 +1100
 @@ -36,6 +36,7 @@
  #include "memory/allocation.inline.hpp"
  #include "memory/filemap.hpp"

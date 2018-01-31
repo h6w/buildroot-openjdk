@@ -1,7 +1,7 @@
-Index: openjdk-jdk-9+181/jdk/src/jdk.pack/share/native/common-unpack/utils.cpp
+Index: openjdk-jdk-9.0.4+11/jdk/src/jdk.pack/share/native/common-unpack/utils.cpp
 ===================================================================
---- openjdk-jdk-9+181.orig/jdk/src/jdk.pack/share/native/common-unpack/utils.cpp	2014-10-16 23:14:57.000000000 +0200
-+++ openjdk-jdk-9+181/jdk/src/jdk.pack/share/native/common-unpack/utils.cpp	2014-10-30 13:24:14.470601910 +0100
+--- openjdk-jdk-9.0.4+11.orig/jdk/src/jdk.pack/share/native/common-unpack/utils.cpp	2014-10-16 23:14:57.000000000 +0200
++++ openjdk-jdk-9.0.4+11/jdk/src/jdk.pack/share/native/common-unpack/utils.cpp	2014-10-30 13:24:14.470601910 +0100
 @@ -46,6 +46,22 @@
  
  #include "unpack.h"

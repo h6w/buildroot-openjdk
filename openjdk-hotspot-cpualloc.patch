@@ -1,5 +1,5 @@
---- openjdk-jdk-9+181/hotspot/src/os/linux/vm/os_linux.cpp.orig	2017-10-05 15:07:19.439537105 +1100
-+++ openjdk-jdk-9+181/hotspot/src/os/linux/vm/os_linux.cpp	2017-10-05 15:07:48.567938773 +1100
+--- openjdk-jdk-9.0.4+11/hotspot/src/os/linux/vm/os_linux.cpp.orig	2017-10-05 15:07:19.439537105 +1100
++++ openjdk-jdk-9.0.4+11/hotspot/src/os/linux/vm/os_linux.cpp	2017-10-05 15:07:48.567938773 +1100
 @@ -4939,45 +4939,8 @@
    int configured_cpus = processor_count();  // upper bound on available cpus
    int cpu_count = 0;

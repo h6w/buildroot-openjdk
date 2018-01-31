@@ -9,15 +9,15 @@
 
 #Version is the same as OpenJDK HG tag
 
-OPENJDK_VERSION = jdk-9+181
-OPENJDK_RELEASE = jdk9
-OPENJDK_PROJECT = jdk9
+OPENJDK_VERSION = jdk-9.0.4+11
+OPENJDK_RELEASE = jdk9u
+OPENJDK_PROJECT = jdk-updates
 OPENJDK_VARIANT = client
-OPENJDK_SOURCE = openjdk-$(OPENJDK_VERSION).tar.gz
+OPENJDK_SOURCE = openjdk-$(OPENJDK_VERSION).tar.xz
 OPENJDK_SITE = http://cdn.tudorholton.net
 
-export LIBFFI_CFLAGS=-I$(HOST_DIR)/usr/$(TARGET_ARCH)-buildroot-linux-gnu/include
-export LIBFFI_LIBS=-L$(HOST_DIR)/usr/$(TARGET_ARCH)-linux-gnu/sysroot/usr/lib/ -lffi
+#export LIBFFI_CFLAGS=-I$(HOST_DIR)/usr/$(TARGET_ARCH)-buildroot-linux-gnu/include
+#export LIBFFI_LIBS=-L$(HOST_DIR)/usr/$(TARGET_ARCH)-linux-gnu/sysroot/usr/lib/ -lffi
 
 # TODO make conditional
 # --with-import-hotspot=$(STAGING_DIR)/hotspot \

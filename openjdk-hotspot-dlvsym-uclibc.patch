@@ -1,7 +1,7 @@
-Index: openjdk-jdk-9+181/hotspot/src/os/linux/vm/os_linux.cpp
+Index: openjdk-jdk-9.0.4+11/hotspot/src/os/linux/vm/os_linux.cpp
 ===================================================================
---- openjdk-jdk-9+181/hotspot/src/os/linux/vm/os_linux.cpp	2011-12-20 19:15:05.000000000 +0100
-+++ openjdk-jdk-9+181/hotspot/src/os/linux/vm/os_linux.cpp	2011-12-20 19:18:22.411503442 +0100
+--- openjdk-jdk-9.0.4+11/hotspot/src/os/linux/vm/os_linux.cpp	2011-12-20 19:15:05.000000000 +0100
++++ openjdk-jdk-9.0.4+11/hotspot/src/os/linux/vm/os_linux.cpp	2011-12-20 19:18:22.411503442 +0100
 @@ -2881,10 +2881,7 @@
  // If we are running with earlier version, which did not have symbol versions,
  // we should use the base version.
