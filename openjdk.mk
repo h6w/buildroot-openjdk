@@ -35,6 +35,7 @@ OPENJDK_CONF_OPTS = \
 	--with-tools-dir=$(HOST_DIR) \
 	--disable-freetype-bundling \
         --enable-unlimited-crypto \
+	--with-extra-cflags='-Wno-maybe-uninitialized' \
         --with-x
 	
 OPENJDK_MAKE_OPTS = all CONF=linux-$(TARGET_ARCH)-normal-zero-release
