@@ -5,6 +5,11 @@ config BR2_PACKAGE_OPENJDK
 	select BR2_PACKAGE_LIBGTK2
 	select BR2_PACKAGE_CUPS
 	select BR2_PACKAGE_XLIB_LIBXTST
+	select BR2_PACKAGE_ELFUTILS
+	select BR2_PACKAGE_BUILDROOT_LOCALE
+	select BR2_PTHREADS_DEBUG
+	comment "openjdk needs a toolchain w/ threads"
+	depends on BR2_TOOLCHAIN_HAS_THREADS
 	help
 	  OpenJDK JRE runtime.
 

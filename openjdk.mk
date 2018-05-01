@@ -24,7 +24,6 @@ OPENJDK_SITE = http://cdn.tudorholton.net
 
 export DISABLE_HOTSPOT_OS_VERSION_CHECK=ok
 OPENJDK_CONF_OPTS = \
-	--with-jvm-interpreter=cpp \
 	--with-jvm-variants=$(OPENJDK_VARIANT) \
 	--with-freetype-include=$(STAGING_DIR)/usr/include/freetype2 \
 	--with-freetype-lib=$(STAGING_DIR)/usr/lib \
