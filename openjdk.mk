@@ -9,8 +9,8 @@
 
 #Version is the same as OpenJDK HG tag
 
-OPENJDK_VERSION = jdk-9.0.4+11
-OPENJDK_RELEASE = jdk9u
+OPENJDK_VERSION = jdk-10.0.1+10
+OPENJDK_RELEASE = jdk10u
 OPENJDK_PROJECT = jdk-updates
 OPENJDK_VARIANT = client
 OPENJDK_SOURCE = openjdk-$(OPENJDK_VERSION).tar.xz
