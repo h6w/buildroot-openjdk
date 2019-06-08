@@ -1,752 +1,868 @@
-config BR2_PACKAGE_OPENJDK
-	bool "openjdk"
-	select BR2_PACKAGE_BUILDROOT_LOCALE
-	select BR2_PTHREAD_DEBUG
-	depends on BR2_TOOLCHAIN_HAS_THREADS
+#
+
+mainmenu "Buildroot $BR2_VERSION Configuration"
+
+config BR2_HAVE_DOT_CONFIG
+	bool
+	default y
+
+config BR2_VERSION
+	string
+	option env="BR2_VERSION_FULL"
+
+config BR2_HOSTARCH
+	string
+	option env="HOSTARCH"
+
+config BR2_BUILD_DIR
+	string
+	option env="BUILD_DIR"
+
+# Hidden config symbols for packages to check system gcc version
+config BR2_HOST_GCC_VERSION
+	string
+	option env="HOST_GCC_VERSION"
+
+config BR2_HOST_GCC_AT_LEAST_4_5
+	bool
+	default y if BR2_HOST_GCC_VERSION = "4 5"
+
+config BR2_HOST_GCC_AT_LEAST_4_6
+	bool
+	default y if BR2_HOST_GCC_VERSION = "4 6"
+	select BR2_HOST_GCC_AT_LEAST_4_5
+
+config BR2_HOST_GCC_AT_LEAST_4_7
+	bool
+	default y if BR2_HOST_GCC_VERSION = "4 7"
+	select BR2_HOST_GCC_AT_LEAST_4_6
+
+config BR2_HOST_GCC_AT_LEAST_4_8
+	bool
+	default y if BR2_HOST_GCC_VERSION = "4 8"
+	select BR2_HOST_GCC_AT_LEAST_4_7
+
+config BR2_HOST_GCC_AT_LEAST_4_9
+	bool
+	default y if BR2_HOST_GCC_VERSION = "4 9"
+	select BR2_HOST_GCC_AT_LEAST_4_8
+
+config BR2_HOST_GCC_AT_LEAST_5
+	bool
+	default y if BR2_HOST_GCC_VERSION = "5"
+	select BR2_HOST_GCC_AT_LEAST_4_9
+
+config BR2_HOST_GCC_AT_LEAST_6
+	bool
+	default y if BR2_HOST_GCC_VERSION = "6"
+	select BR2_HOST_GCC_AT_LEAST_5
+
+config BR2_HOST_GCC_AT_LEAST_7
+	bool
+	default y if BR2_HOST_GCC_VERSION = "7"
+	select BR2_HOST_GCC_AT_LEAST_6
+
+config BR2_HOST_GCC_AT_LEAST_8
+	bool
+	default y if BR2_HOST_GCC_VERSION = "8"
+	select BR2_HOST_GCC_AT_LEAST_7
+
+# When adding new entries above, be sure to update
+# the HOSTCC_MAX_VERSION variable in the Makefile.
+
+# Hidden boolean selected by packages in need of Java in order to build
+# (example: kodi)
+config BR2_NEEDS_HOST_JAVA
+	bool
+
+# Hidden boolean selected by packages in need of javac in order to build
+# (example: classpath)
+config BR2_NEEDS_HOST_JAVAC
+	bool
+
+# Hidden boolean selected by packages in need of jar in order to build
+# (example: classpath)
+config BR2_NEEDS_HOST_JAR
+	bool
+
+# Hidden boolean selected by pre-built packages for x86, when they
+# need to run on x86-64 machines (example: pre-built external
+# toolchains, binary tools like SAM-BA, etc.).
+config BR2_HOSTARCH_NEEDS_IA32_LIBS
+	bool
+
+# Hidden boolean selected by packages that need to build 32 bits
+# binaries with the host compiler, even on 64 bits build machines (e.g
+# bootloaders).
+config BR2_HOSTARCH_NEEDS_IA32_COMPILER
+	bool
+
+# Hidden boolean selected by packages that need the host to have an
+# UTF8 locale.
+config BR2_NEEDS_HOST_UTF8_LOCALE
+	bool
+
+source "arch/Config.in"
+
+menu "Build options"
+
+menu "Commands"
+
+config BR2_WGET
+	string "Wget command"
+	default "wget --passive-ftp -nd -t 3"
+
+config BR2_SVN
+	string "Subversion (svn) command"
+	default "svn --non-interactive"
+
+config BR2_BZR
+	string "Bazaar (bzr) command"
+	default "bzr"
+
+config BR2_GIT
+	string "Git command"
+	default "git"
+
+config BR2_CVS
+	string "CVS command"
+	default "cvs"
+
+config BR2_LOCALFILES
+	string "Local files retrieval command"
+	default "cp"
+
+config BR2_SCP
+	string "Secure copy (scp) command"
+	default "scp"
+
+config BR2_HG
+	string "Mercurial (hg) command"
+	default "hg"
+
+config BR2_ZCAT
+	string "zcat command"
+	default "gzip -d -c"
 	help
-	  OpenJDK JRE runtime.
-
-	  http://openjdk.java.net/
-
-if BR2_PACKAGE_OPENJDK
-
-#
-# Version selection. We provide the choice between:
-#
-#  1. An LTS release version
-#  2. The latest release version (may be the same as LTS)
-#  3. A specified custom project/release/version from hg.openjdk.java.net
-#
-
-        choice
-		prompt "OpenJDK version"
-
-		config BR2_PACKAGE_OPENJDK_LTS
-			bool "Latest LTS version (jdk-updates/jdk11u/jdk-11.0.1+13)"
-			help
-			  The current (and first) LTS version released October 2018.
-
-		config BR2_PACKAGE_OPENJDK_LATEST
-			bool "Latest version (jdk-updates/jdk11u/jdk-11.0.1+13)"
-			help
-			  The current version released October 2018.
-
-		config BR2_PACKAGE_OPENJDK_CUSTOM_OJN
-			bool "Specify a version from the OpenJDK Mercurial Repository"
-			help
-			  A custom version specified by project/release/branch from the mercurial repository hg.openjdk.java.net.
-
-		config BR2_PACKAGE_OPENJDK_CUSTOM_TARBALL
-			bool "Custom tarball"
-			help
-			  This option allows to specify a URL pointing to a kernel
-			  source tarball. This URL can use any protocol recognized by
-			  Buildroot, like http://, ftp://, file:// or scp://.
-
-			  When pointing to a local tarball using file://, you may want
-			  to use a make variable like $(TOPDIR) to reference the root of
-			  the Buildroot tree.
-
-		config BR2_PACKAGE_OPENJDK_CUSTOM_GIT
-			bool "Custom Git repository"
-			help
-			  This option allows Buildroot to get the Linux kernel source
-			  code from a Git repository.
-
-		config BR2_PACKAGE_OPENJDK_CUSTOM_HG
-			bool "Custom Mercurial repository"
-			help
-			  This option allows Buildroot to get the Linux kernel source
-			  code from a Mercurial repository.
-
-		config BR2_PACKAGE_OPENJDK_CUSTOM_SVN
-			bool "Custom Subversion repository"
-			help
-			  This option allows Buildroot to get the Linux kernel source
-			  code from a Subversion repository.
-
-	endchoice
-
-	
-	if BR2_PACKAGE_OPENJDK_CUSTOM_OJN
-
-		config BR2_PACKAGE_OPENJDK_CUSTOM_OJN_PROJECT
-			string "OpenJDK Project"
-			default "jdk-updates"
-			help
-			  The top branch at hg.openjdk.java.net (e.g. jdk-updates)
-
-		config BR2_PACKAGE_OPENJDK_CUSTOM_OJN_RELEASE
-			string "OpenJDK Release"
-			default "jdk11u"
-			help
-			  The second-from-top branch at hg.openjdk.java.net (e.g. jdk11u)
-
-		config BR2_PACKAGE_OPENJDK_CUSTOM_OJN_VERSION
-			string "OpenJDK Release"
-			default "jdk-11.0.1+13"
-			help
-			  The complete version title at hg.openjdk.java.net (e.g. jdk-11.0.1+13)
-	endif
-
-	config BR2_PACKAGE_OPENJDK_CUSTOM_TARBALL_LOCATION
-		string "URL of custom kernel tarball"
-		depends on BR2_PACKAGE_OPENJDK_CUSTOM_TARBALL
-
-	if BR2_PACKAGE_OPENJDK_CUSTOM_GIT || BR2_PACKAGE_OPENJDK_CUSTOM_HG || BR2_PACKAGE_OPENJDK_CUSTOM_SVN
-
-		config BR2_PACKAGE_OPENJDK_CUSTOM_REPO_URL
-			string "URL of custom repository"
-
-		config BR2_PACKAGE_OPENJDK_CUSTOM_REPO_VERSION
-			string "Custom repository version"
-			help
-			  Revision to use in the typical format used by
-			  Git/Mercurial/Subversion E.G. a sha id, a tag, branch, ..
-
-	endif
-
-#
-# Build type selection. We provide the choice between:
-#
-#  1. JRE
-#  2. JDK
-#
-        choice
-		prompt "Build type"
-
-	config BR2_PACKAGE_OPENJDK_JRE
-		bool "JRE"
-		help
-		  Build only the JRE to run java applications.
-
-	config BR2_PACKAGE_OPENJDK_JDK
-		bool "JDK"
-		help
-		  Build the JDK to compile, link, debug, and run java code and applications.
-
-	endchoice
-
-#
-# Build type selection. We provide the choice between:
-#
-#  1. Headless
-#  2. WITH_X
-#
-        choice
-		prompt "Graphical Interface"
-
-	config BR2_PACKAGE_OPENJDK_WITH_X
-		bool "With X"
-		comment "needs an X.Org server"
-		depends on BR2_PACKAGE_XORG7
-		help
-		  Build against X.Org to run graphical applications.
-
-	config BR2_PACKAGE_OPENJDK_HEADLESS
-		bool "Without X"
-		help
-		  Build without graphical output.
-
-	endchoice
-
-
-
-#
-# Modules selection. We provide the choice between:
-#
-#  1. java.SE
-#  2. All java.* (all java.* modules)
-#  3. All jdk.* (all java.* and jdk.* modules - only available in JDK build)
-#  4. Custom module selection
-#
-
-        choice
-		prompt "Modules"
-
-
-		config BR2_PACKAGE_OPENJDK_MODULES_JAVA_SE
-			bool "All the modules required by java.SE"
-			selects BR2_PACKAGE_OPENJDK_MODULE_JAVA_SE
-			help
-			  All the modules required by java.SE:
-			    java.sql.rowset
-			      java.sql
-			        java.logging
-				  java.base
-			        java.xml
-				  java.base
-			        java.transaction.xa
-				  java.base
-			      java.naming
-				java.base
-			    java.scripting
-			      java.base
-			    java.xml.crypto
-			      java.xml
-				java.base
-			    java.desktop
-			      java.xml
-				java.base
-			      java.datatransfer
-				java.base
-			    java.compiler
-			      java.base
-			    java.instrument
-			      java.base
-			    java.management.rmi
-			      java.management
-				java.base
-			      java.rmi
-				java.base
-			    java.net.http
-			      java.base
-			    java.prefs
-			      java.base
-			    java.security.jgss
-			      java.base
-			    java.security.sasl
-			      java.base
-
-
-		config BR2_PACKAGE_OPENJDK_MODULES_JAVA_ALL
-			bool "Select all the java.* modules available"
-			selects BR2_PACKAGE_OPENJDK_MODULE_JAVA_SE
-		        selects BR2_PACKAGE_OPENJDK_MODULE_JAVA_SMARTCARDIO
-			help
-			  All the modules required by java.SE plus:
-			    java.smartcardio
-
-		config BR2_PACKAGE_OPENJDK_MODULES_JDK_ALL
-			bool "Select all the java.* and jdk.* modules available"
-			depends on BR2_PACKAGE_OPENJDK_JDK
-			selects BR2_PACKAGE_OPENJDK_MODULE_JAVA_SE
-		        selects BR2_PACKAGE_OPENJDK_MODULE_JAVA_SMARTCARDIO
-		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_ACCESSIBILITY
-		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_ATTACH
-		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_CHARSETS
-		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_COMPILER
-		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_CRYPTO_CRYPTOKI
-		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_CRYPTO_EC
-		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_DYNALINK
-		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_EDITPAD
-		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_HOTSPOT_AGENT
-		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_HTTPSERVER
-		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_JARTOOL
-		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_JAVADOC
-		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_JCMD
-		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_JCONSOLE
-		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_JDEPS
-		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_JDI
-		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_JDWP_AGENT
-		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_JFR
-		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_JLINK
-		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_JSHELL
-		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_JSOBJECT
-		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_JSTATD
-		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_LOCALEDATA
-		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_MANAGEMENT
-		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_MANAGEMENT_AGENT
-		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_MANAGEMENT_JFR
-		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_NAMING_DNS
-		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_NAMING_RMI
-		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_NET
-		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_PACK
-		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_RMIC
-		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_SCRIPTING_NASHORN
-		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_SCTP
-		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_SECURITY_AUTH
-		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_SECURITY_JGSS
-		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_XML_DOM
-		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_ZIPFS
-			help
-			  All the modules required by java plus:
-			    jdk.accessibility
-			      java.desktop
-			        java.xml
-				  java.base
-			        java.datatransfer
-				  java.base
-			    jdk.attach
-			      java.base
-			    jdk.charsets
-			      java.base
-			    jdk.compiler
-			      java.compiler
-			        java.base
-			    jdk.crypto.cryptoki
-			      java.base
-			    jdk.crypto.ec
-			      java.base
-			    jdk.dynalink
-			      java.base
-			    jdk.editpad
-			      java.base
-			    jdk.hotspot.agent
-			      java.base
-			    jdk.httpserver
-			      java.base
-			    jdk.jartool
-			      java.base
-			    jdk.javadoc
-			      jdk.compiler
-			        java.compiler
-			          java.base
-			    jdk.jcmd
-			      java.base
-			    jdk.jconsole
- 			      java.desktop
-			        java.xml
-				  java.base
-			        java.datatransfer
-				  java.base
-			      java.management
-				java.base
-			    jdk.jdeps
-			      java.base
-			    jdk.jdi
-			      java.base
-			    jdk.jdwp.agent
-			      java.base
-			    jdk.jfr
-			      java.base
-			    jdk.jlink
-			      java.base
-			    jdk.jshell
-			      java.compiler
-			        java.base
-			      java.prefs
-			        java.base
-			      jdk.jdi
-			        java.base
-			    jdk.jsobject
-			      java.base
-			    jdk.jstatd
-			      java.base
-			    jdk.localedata
-			      java.base
-			    jdk.management
-			      java.management
-			        java.base
-			    jdk.management.agent
-			      java.base
-			    jdk.management.jfr
-			      java.management
-			        java.base
-			    jdk.naming.dns
-			      java.base
-			    jdk.naming.rmi
-			      java.base
-			    jdk.net
-			      java.base
-			    jdk.pack
-			      java.base
-			    jdk.rmic
-			      java.base
-			    jdk.scripting.nashorn
-			      java.scripting
-			        java.base
-			    jdk.sctp
-			      java.base
-			    jdk.security.auth
-			      java.naming
-				java.base
-			    jdk.security.jgss
-			      java.security.jgss
-				java.base
-			    jdk.xml.dom
-			      java.xml
-				java.base
-			    jdk.zipfs
-			      java.base
-
-
-
-	config BR2_PACKAGE_OPENJDK_MODULES
-		menu "choose specific modules"
-
-	if BR2_PACKAGE_OPENJDK_MODULES
-		config BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
-			bool "java.base"
-			depends on BR2_PACKAGE_OPENJDK_MODULES
-			help
-				Defines the foundational APIs of the Java SE Platform.
-
-		config BR2_PACKAGE_OPENJDK_MODULE_JAVA_COMPILER
-			bool "java.compiler"
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
-			help
-				Defines the Language Model, Annotation Processing, and Java Compiler APIs.
-
-		config BR2_PACKAGE_OPENJDK_MODULE_JAVA_DATATRANSFER
-			bool "java.datatransfer"
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
-			help
-				Defines the API for transferring data between and within applications.
-
-		config BR2_PACKAGE_OPENJDK_MODULE_JAVA_DESKTOP
-			bool "java.desktop"
-			comment "The java.desktop module requires X."
-			    depends on BR2_PACKAGE_OPENJDK_WITH_X
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_XML
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_DATATRANSFER
-			select BR2_PACKAGE_ALSA_LIB
-			select BR2_PACKAGE_CUPS
-			select BR2_PACKAGE_GIFLIB
-			select BR2_PACKAGE_JPEG
-			select BR2_PACKAGE_LIBGTK2
-			select BR2_PACKAGE_LIBUSB
-			select BR2_PACKAGE_XLIB_LIBXT
-			select BR2_PACKAGE_XLIB_LIBXTST
-			help
-				Defines the AWT and Swing user interface toolkits, plus APIs for accessibility, audio, imaging, printing, and JavaBeans.
-
-		config BR2_PACKAGE_OPENJDK_MODULE_JAVA_INSTRUMENT
-			bool "java.instrument"
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
-			help
-				Defines services that allow agents to instrument programs running on the JVM.
-
-		config BR2_PACKAGE_OPENJDK_MODULE_JAVA_LOGGING
-			bool "java.logging"
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
-			help
-				Defines the Java Logging API.
-
-		config BR2_PACKAGE_OPENJDK_MODULE_JAVA_MANAGEMENT
-			bool "java.management"
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
-			help
-				Defines the Java Management Extensions (JMX) API.
-
-		config BR2_PACKAGE_OPENJDK_MODULE_JAVA_MANAGEMENT_RMI
-			bool "java.management.rmi"
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_MANAGEMENT
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_RMI
-			help
-				Defines the RMI connector for the Java Management Extensions (JMX) Remote API.
-
-		config BR2_PACKAGE_OPENJDK_MODULE_JAVA_NAMING
-			bool "java.naming"
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
-			help
-				Defines the Java Naming and Directory Interface (JNDI) API.
-
-		config BR2_PACKAGE_OPENJDK_MODULE_JAVA_NET_HTTP
-			bool "java.net.http"
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
-			help
-				Defines the HTTP Client and WebSocket APIs.
-
-		config BR2_PACKAGE_OPENJDK_MODULE_JAVA_PREFS
-			bool "java.prefs"
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
-			help
-				Defines the Preferences API.
-
-		config BR2_PACKAGE_OPENJDK_MODULE_JAVA_RMI
-			bool "java.rmi"
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
-			help
-				Defines the Remote Method Invocation (RMI) API.
-
-		config BR2_PACKAGE_OPENJDK_MODULE_JAVA_SCRIPTING
-			bool "java.scripting"
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
-			help
-				Defines the Scripting API.
-
-		config BR2_PACKAGE_OPENJDK_MODULE_JAVA_SE
-			bool "java.se"
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_SQL_ROWSET
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_SCRIPTING
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_XML_CRYPTO
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_DESKTOP
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_COMPILER
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_INSTRUMENT
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_MANAGEMENT_RMI
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_NET_HTTP
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_PREFS
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_SECURITY_JGSS
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_SECURITY_SASL
-			help
-				Defines the API of the Java SE Platform.
-
-		config BR2_PACKAGE_OPENJDK_MODULE_JAVA_SECURITY_JGSS
-			bool "java.security.jgss"
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
-			help
-				Defines the Java binding of the IETF Generic Security Services API (GSS-API).
-
-		config BR2_PACKAGE_OPENJDK_MODULE_JAVA_SECURITY_SASL
-			bool "java.security.sasl"
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
-			help
-				Defines Java support for the IETF Simple Authentication and Security Layer (SASL).
-
-		config BR2_PACKAGE_OPENJDK_MODULE_JAVA_SMARTCARDIO
-			bool "java.smartcardio"
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
-			help
-				Defines the Java Smart Card I/O API.
-
-		config BR2_PACKAGE_OPENJDK_MODULE_JAVA_SQL
-			bool "java.sql"
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_LOGGING
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_XML
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_TRANSACTION_XA
-			help
-				Defines the JDBC API.
-
-		config BR2_PACKAGE_OPENJDK_MODULE_JAVA_SQL_ROWSET
-			bool "java.sql.rowset"
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_SQL
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_NAMING
-			help
-				Defines the JDBC RowSet API.
-
-		config BR2_PACKAGE_OPENJDK_MODULE_JAVA_TRANSACTION_XA
-			bool "java.transaction.xa"
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
-			help
-				Defines an API for supporting distributed transactions in JDBC.
-
-		config BR2_PACKAGE_OPENJDK_MODULE_JAVA_XML
-			bool "java.xml"
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
-			help
-				Defines the Java API for XML Processing (JAXP), the Streaming API for XML (StAX), the Simple API for XML (SAX), and the W3C Document Object Model (DOM) API.
-
-		config BR2_PACKAGE_OPENJDK_MODULE_JAVA_XML_CRYPTO
-			bool "java.xml.crypto"
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_XML
-			help
-				Defines the API for XML cryptography.
-
-		config BR2_PACKAGE_OPENJDK_MODULE_JDK_ACCESSIBILITY
-			bool "jdk.accessibility"
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_DESKTOP
-			help
-				Defines JDK utility classes used by implementors of Assistive Technologies.
-
-		config BR2_PACKAGE_OPENJDK_MODULE_JDK_ATTACH
-			bool "jdk.attach"
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
-			help
-				Defines the attach API.
-
-		config BR2_PACKAGE_OPENJDK_MODULE_JDK_CHARSETS
-			bool "jdk.charsets"
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
-			help
-				Provides charsets that are not in java.base (mostly double byte and IBM charsets).
-
-		config BR2_PACKAGE_OPENJDK_MODULE_JDK_COMPILER
-			bool "jdk.compiler"
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_COMPILER
-			help
-				Defines the implementation of the system Java compiler and its command line equivalent, javac.
-
-		config BR2_PACKAGE_OPENJDK_MODULE_JDK_CRYPTO_CRYPTOKI
-			bool "jdk.crypto.cryptoki"
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
-			help
-				Provides the implementation of the SunPKCS11 security provider.
-
-		config BR2_PACKAGE_OPENJDK_MODULE_JDK_CRYPTO_EC
-			bool "jdk.crypto.ec"
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
-			help
-				Provides the implementation of the SunEC security provider.
-
-		config BR2_PACKAGE_OPENJDK_MODULE_JDK_DYNALINK
-			bool "jdk.dynalink"
-		**        select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
-			help
-				Defines the API for dynamic linking of high-level operations on objects.
-
-		config BR2_PACKAGE_OPENJDK_MODULE_JDK_EDITPAD
-			bool "jdk.editpad"
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
-			help
-				Provides the implementation of the edit pad service used by jdk.jshell.
-
-		config BR2_PACKAGE_OPENJDK_MODULE_JDK_HOTSPOT_AGENT
-			bool "jdk.hotspot.agent"
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
-			help
-				Defines the implementation of the HotSpot Serviceability Agent.
-
-		config BR2_PACKAGE_OPENJDK_MODULE_JDK_HTTPSERVER
-			bool "jdk.httpserver"
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
-			help
-				Defines the JDK-specific HTTP server API.
-
-
-		config BR2_PACKAGE_OPENJDK_MODULE_JDK_JARTOOL
-			bool "jdk.jartool"
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
-			help
-				Defines tools for manipulating Java Archive (JAR) files, including the jar and jarsigner tools.
-
-		config BR2_PACKAGE_OPENJDK_MODULE_JDK_JAVADOC
-			bool "jdk.javadoc"
-			select BR2_PACKAGE_OPENJDK_MODULE_JDK_COMPILER
-			help
-				Defines the implementation of the system documentation tool and its command line equivalent, javadoc.
-
-		config BR2_PACKAGE_OPENJDK_MODULE_JDK_JCMD
-			bool "jdk.jcmd"
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
-			help
-				Defines tools for diagnostics and troubleshooting a JVM such as the jcmd, jps, jstat tools.
-
-		config BR2_PACKAGE_OPENJDK_MODULE_JDK_JCONSOLE
-			bool "jdk.jconsole"
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_DESKTOP
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_MANAGEMENT
-			help
-				Defines the JMX graphical tool, jconsole, for monitoring and managing a running application.
-
-		config BR2_PACKAGE_OPENJDK_MODULE_JDK_JDEPS
-			bool "jdk.jdeps"
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
-			help
-				Defines tools for analysing dependencies in Java libraries and programs, including the jdeps, javap, and jdeprscan tools.
-
-		config BR2_PACKAGE_OPENJDK_MODULE_JDK_JDI
-			bool "jdk.jdi"
-		**        select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
-			help
-				Defines the Java Debug Interface.
-
-		config BR2_PACKAGE_OPENJDK_MODULE_JDK_JDWP_AGENT
-			bool "jdk.jdwp.agent"
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
-			help
-				Provides the implementation of the Java Debug Wire Protocol (JDWP) agent.
-
-		config BR2_PACKAGE_OPENJDK_MODULE_JDK_JFR
-			bool "jdk.jfr"
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
-			help
-				Defines the API for JDK Flight Recorder.
-
-		config BR2_PACKAGE_OPENJDK_MODULE_JDK_JLINK
-			bool "jdk.jlink"
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
-			help
-				Defines the jlink tool for creating run-time images, the jmod tool for creating and manipulating JMOD files, and the jimage tool for inspecting the JDK implementation-specific container file for classes and resources.
-
-		config BR2_PACKAGE_OPENJDK_MODULE_JDK_JSHELL
-			bool "jdk.jshell"
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_COMPILER
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_PREFS
-			select BR2_PACKAGE_OPENJDK_MODULE_JDK_JDI
-			help
-				This module provides support for Java Programming Language 'snippet' evaluating tools, such as Read-Eval-Print Loops (REPLs), including the jshell tool.
-
-		config BR2_PACKAGE_OPENJDK_MODULE_JDK_JSOBJECT
-			bool "jdk.jsobject"
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
-			help
-				Defines the API for the JavaScript Object.
-
-		config BR2_PACKAGE_OPENJDK_MODULE_JDK_JSTATD
-			bool "jdk.jstatd"
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
-			help
-				Defines the jstatd tool for starting a daemon for the jstat tool to monitor JVM statistics remotely.
-
-		config BR2_PACKAGE_OPENJDK_MODULE_JDK_LOCALEDATA
-			bool "jdk.localedata"
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
-			help
-				Provides the locale data for locales other than US locale.
-
-		config BR2_PACKAGE_OPENJDK_MODULE_JDK_MANAGEMENT
-			bool "jdk.management"
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_MANAGEMENT
-			help
-				Defines JDK-specific management interfaces for the JVM.
-
-		config BR2_PACKAGE_OPENJDK_MODULE_JDK_MANAGEMENT_AGENT
-			bool "jdk.management.agent"
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
-			help
-				Defines the JMX management agent.
-
-		config BR2_PACKAGE_OPENJDK_MODULE_JDK_MANAGEMENT_JFR
-			bool "jdk.management.jfr"
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_MANAGEMENT
-			help
-				Defines the Management Interface for JDK Flight Recorder.
-
-		config BR2_PACKAGE_OPENJDK_MODULE_JDK_NAMING_DNS
-			bool "jdk.naming.dns"
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
-			help
-				Provides the implementation of the DNS Java Naming provider.
-
-		config BR2_PACKAGE_OPENJDK_MODULE_JDK_NAMING_RMI
-			bool "jdk.naming.rmi"
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
-			help
-				Provides the implementation of the RMI Java Naming provider.
-
-		config BR2_PACKAGE_OPENJDK_MODULE_JDK_NET
-			bool "jdk.net"
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
-			help
-				Defines the JDK-specific Networking API.
-
-		config BR2_PACKAGE_OPENJDK_MODULE_JDK_PACK
-			bool "jdk.pack **DEPRECATED**"
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
-			help
-				Defines tools for transforming a JAR file into a compressed pack200 file and transforming a packed file into a JAR file, including the pack200 and unpack200 tools.
-
-		config BR2_PACKAGE_OPENJDK_MODULE_JDK_RMIC
-			bool "jdk.rmic"
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
-			help
-				Defines the rmic compiler for generating stubs and skeletons using the Java Remote Method Protocol (JRMP) for remote objects.
-
-		config BR2_PACKAGE_OPENJDK_MODULE_JDK_SCRIPTING_NASHORN
-			bool "jdk.scripting.nashorn **DEPRECATED**"
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_SCRIPTING
-			help
-				Provides the implementation of Nashorn script engine and the runtime environment for programs written in ECMAScript 5.1.
-
-		config BR2_PACKAGE_OPENJDK_MODULE_JDK_SCTP
-			bool "jdk.sctp"
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
-			help
-				Defines the JDK-specific API for SCTP.
-
-		config BR2_PACKAGE_OPENJDK_MODULE_JDK_SECURITY_AUTH
-			bool "jdk.security.auth"
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_NAMING
-			help
-				Provides implementations of the javax.security.auth.* interfaces and various authentication modules.
-
-		config BR2_PACKAGE_OPENJDK_MODULE_JDK_SECURITY_JGSS
-			bool "jdk.security.jgss"
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_SECURITY_JGSS
-			help
-				Defines JDK extensions to the GSS-API and an implementation of the SASL GSSAPI mechanism.
-				
-		config BR2_PACKAGE_OPENJDK_MODULE_JDK_XML_DOM
-			bool "jdk.xml.dom"
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_XML
-			help
-				Defines the subset of the W3C Document Object Model (DOM) API that is not part of the Java SE API.
-
-		config BR2_PACKAGE_OPENJDK_MODULE_JDK_ZIPFS
-			bool "jdk.zipfs"
-			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
-			help
-				Provides the implementation of the zip file system provider.
-
-
+	  Command to be used to extract a gzip'ed file to stdout. zcat
+	  is identical to gunzip -c except that the former may not be
+	  available on your system.
+	  Default is "gzip -d -c"
+	  Other possible values include "gunzip -c" or "zcat".
+
+config BR2_BZCAT
+	string "bzcat command"
+	default "bzcat"
+	help
+	  Command to be used to extract a bzip2'ed file to stdout.
+	  bzcat is identical to bunzip2 -c except that the former may
+	  not be available on your system.
+	  Default is "bzcat"
+	  Other possible values include "bunzip2 -c" or "bzip2 -d -c".
+
+config BR2_XZCAT
+	string "xzcat command"
+	default "xzcat"
+	help
+	  Command to be used to extract a xz'ed file to stdout.
+	  Default is "xzcat"
+
+config BR2_LZCAT
+	string "lzcat command"
+	default "lzip -d -c"
+	help
+	  Command to be used to extract a lzip'ed file to stdout.
+	  Default is "lzip -d -c"
+
+config BR2_TAR_OPTIONS
+	string "Tar options"
+	default ""
+	help
+	  Options to pass to tar when extracting the sources.
+	  E.g. " -v --exclude='*.svn*'" to exclude all .svn internal
+	  files and to be verbose.
+
+endmenu
+
+config BR2_DEFCONFIG_FROM_ENV
+	string
+	option env="BR2_DEFCONFIG"
+
+config BR2_DEFCONFIG
+	string "Location to save buildroot config"
+	default BR2_DEFCONFIG_FROM_ENV if BR2_DEFCONFIG_FROM_ENV != ""
+	default "$(CONFIG_DIR)/defconfig"
+	help
+	  When running 'make savedefconfig', the defconfig file will be
+	  saved in this location.
+
+config BR2_DL_DIR
+	string "Download dir"
+	default "$(TOPDIR)/dl"
+	help
+	  Directory to store all the source files that we need to fetch.
+	  If the Linux shell environment has defined the BR2_DL_DIR
+	  environment variable, then this overrides this configuration
+	  item.
+	  The directory is organized with a subdirectory for each
+	  package. Each package has its own $(LIBFOO_DL_DIR) variable
+	  that can be used to find the correct path.
+
+	  The default is $(TOPDIR)/dl
+
+config BR2_HOST_DIR
+	string "Host dir"
+	default "$(BASE_DIR)/host"
+	help
+	  Directory to store all the binary files that are built for the
+	  host. This includes the cross compilation toolchain when
+	  building the internal buildroot toolchain.
+
+	  The default is $(BASE_DIR)/host
+
+menu "Mirrors and Download locations"
+
+config BR2_PRIMARY_SITE
+	string "Primary download site"
+	default ""
+	help
+	  Primary site to download from. If this option is set then
+	  buildroot will try to download package source first from this
+	  site and try the default if the file is not found.
+	  Valid URIs are:
+	    - URIs recognized by $(WGET)
+	    - local URIs of the form file://absolutepath
+	    - scp URIs of the form scp://[user@]host:path.
+
+config BR2_PRIMARY_SITE_ONLY
+	bool "Only allow downloads from primary download site"
+	depends on BR2_PRIMARY_SITE != ""
+	help
+	  If this option is enabled, downloads will only be attempted
+	  from the primary download site. Other locations, like the
+	  package's official download location or the backup download
+	  site, will not be considered. Therefore, if the package is not
+	  present on the primary site, the download fails.
+
+	  This is useful for project developers who want to ensure that
+	  the project can be built even if the upstream tarball
+	  locations disappear.
+
+if !BR2_PRIMARY_SITE_ONLY
+
+config BR2_BACKUP_SITE
+	string "Backup download site"
+	default "http://sources.buildroot.net"
+	help
+	  Backup site to download from. If this option is set then
+	  buildroot will fall back to download package sources from here
+	  if the normal location fails.
+
+config BR2_KERNEL_MIRROR
+	string "Kernel.org mirror"
+	default "https://cdn.kernel.org/pub"
+	help
+	  kernel.org is mirrored on a number of servers around the
+	  world. The following allows you to select your preferred
+	  mirror. By default, a CDN is used, which automatically
+	  redirects to a mirror geographically close to you.
+
+	  Have a look on the kernel.org site for a list of mirrors, then
+	  enter the URL to the base directory. Examples:
+
+	     http://www.XX.kernel.org/pub (XX = country code)
+	     http://mirror.aarnet.edu.au/pub/ftp.kernel.org
+
+config BR2_GNU_MIRROR
+	string "GNU Software mirror"
+	default "http://ftpmirror.gnu.org"
+	help
+	  GNU has multiple software mirrors scattered around the
+	  world. The following allows you to select your preferred
+	  mirror. By default, a generic address is used, which
+	  automatically selects an up-to-date and local mirror.
+
+	  Have a look on the gnu.org site for a list of mirrors, then
+	  enter the URL to the base directory. Examples:
+
+	     http://ftp.gnu.org/pub/gnu
+	     http://mirror.aarnet.edu.au/pub/gnu
+
+config BR2_LUAROCKS_MIRROR
+	string "LuaRocks mirror"
+	default "http://rocks.moonscript.org"
+	help
+	  LuaRocks repository.
+
+	  See http://luarocks.org
+
+config BR2_CPAN_MIRROR
+	string "CPAN mirror (Perl packages)"
+	default "http://cpan.metacpan.org"
+	help
+	  CPAN (Comprehensive Perl Archive Network) is a repository of
+	  Perl packages. It has multiple software mirrors scattered
+	  around the world. This option allows you to select a mirror.
+
+	  The list of mirrors is available at:
+	  http://search.cpan.org/mirror
+
+endif
+
+endmenu
+
+config BR2_JLEVEL
+	int "Number of jobs to run simultaneously (0 for auto)"
+	default "0"
+	help
+	  Number of jobs to run simultaneously. If 0, determine
+	  automatically according to number of CPUs on the host system.
+
+config BR2_CCACHE
+	bool "Enable compiler cache"
+	help
+	  This option will enable the use of ccache, a compiler cache.
+	  It will cache the result of previous builds to speed up future
+	  builds. By default, the cache is stored in
+	  $HOME/.buildroot-ccache.
+
+	  Note that Buildroot does not try to invalidate the cache
+	  contents when the compiler changes in an incompatible way.
+	  Therefore, if you make a change to the compiler version and/or
+	  configuration, you are responsible for purging the ccache
+	  cache by removing the $HOME/.buildroot-ccache directory.
+
+if BR2_CCACHE
+
+config BR2_CCACHE_DIR
+	string "Compiler cache location"
+	default "$(HOME)/.buildroot-ccache"
+	help
+	  Where ccache should store cached files.
+	  If the Linux shell environment has defined the BR2_CCACHE_DIR
+	  environment variable, then this overrides this configuration
+	  item.
+
+config BR2_CCACHE_INITIAL_SETUP
+	string "Compiler cache initial setup"
+	help
+	  Initial ccache settings to apply, such as --max-files or
+	  --max-size.
+
+	  For example, if your project is known to require more space
+	  than the default max cache size, then you might want to
+	  increase the cache size to a suitable amount using the -M
+	  (--max-size) option.
+
+	  The string you specify here is passed verbatim to ccache.
+	  Refer to ccache documentation for more details.
+
+	  These initial settings are applied after ccache has been
+	  compiled.
+
+config BR2_CCACHE_USE_BASEDIR
+	bool "Use relative paths"
+	default y
+	help
+	  Allow ccache to convert absolute paths within the output
+	  directory into relative paths.
+
+	  During the build, many -I include directives are given with an
+	  absolute path. These absolute paths end up in the hashes that
+	  are computed by ccache. Therefore, when you build from a
+	  different directory, the hash will be different and the cached
+	  object will not be used.
+
+	  To improve cache performance, set this option to y. This
+	  allows ccache to rewrite absolute paths within the output
+	  directory into relative paths. Note that only paths within the
+	  output directory will be rewritten; therefore, if you change
+	  BR2_HOST_DIR to point outside the output directory and
+	  subsequently move it to a different location, this will lead
+	  to cache misses.
+
+	  This option has as a result that the debug information in the
+	  object files also has only relative paths. Therefore, make
+	  sure you cd to the build directory before starting gdb. See
+	  the section "COMPILING IN DIFFERENT DIRECTORIES" in the ccache
+	  manual for more information.
+
+endif
+
+config BR2_ENABLE_DEBUG
+	bool "build packages with debugging symbols"
+	help
+	  Build packages with debugging symbols enabled. All libraries
+	  and binaries in the 'staging' directory will have debugging
+	  symbols, which allows remote debugging even if libraries and
+	  binaries are stripped on the target. Whether libraries and
+	  binaries are stripped on the target is controlled by the
+	  BR2_STRIP_* options below.
+
+if BR2_ENABLE_DEBUG
+choice
+	prompt "gcc debug level"
+	default BR2_DEBUG_2
+	help
+	  Set the debug level for gcc
+
+config BR2_DEBUG_1
+	bool "debug level 1"
+	help
+	  Debug level 1 produces minimal information, enough for making
+	  backtraces in parts of the program that you don't plan to
+	  debug. This includes descriptions of functions and external
+	  variables, but no information about local variables and no
+	  line numbers.
+
+config BR2_DEBUG_2
+	bool "debug level 2"
+	help
+	  The default gcc debug level is 2
+
+config BR2_DEBUG_3
+	bool "debug level 3"
+	help
+	  Level 3 includes extra information, such as all the macro
+	  definitions present in the program. Some debuggers support
+	  macro expansion when you use -g3.
+endchoice
+endif
+
+config BR2_STRIP_strip
+	bool "strip target binaries"
+	default y
+	depends on !BR2_PACKAGE_HOST_ELF2FLT
+	help
+	  Binaries and libraries in the target filesystem will be
+	  stripped using the normal 'strip' command. This allows to save
+	  space, mainly by removing debugging symbols. Debugging symbols
+	  on the target are needed for native debugging, but not when
+	  remote debugging is used.
+
+config BR2_STRIP_EXCLUDE_FILES
+	string "executables that should not be stripped"
+	default ""
+	depends on BR2_STRIP_strip
+	help
+	  You may specify a space-separated list of binaries and
+	  libraries here that should not be stripped on the target.
+
+config BR2_STRIP_EXCLUDE_DIRS
+	string "directories that should be skipped when stripping"
+	default ""
+	depends on BR2_STRIP_strip
+	help
+	  You may specify a space-separated list of directories that
+	  should be skipped when stripping. Binaries and libraries in
+	  these directories will not be touched. The directories should
+	  be specified relative to the target directory, without leading
+	  slash.
+
+choice
+	prompt "gcc optimization level"
+	default BR2_OPTIMIZE_S
+	help
+	  Set the optimization level for gcc
+
+config BR2_OPTIMIZE_0
+	bool "optimization level 0"
+	help
+	  Do not optimize.
+
+config BR2_OPTIMIZE_1
+	bool "optimization level 1"
+	help
+	  Optimize. Optimizing compilation takes somewhat more time, and
+	  a lot more memory for a large function. With -O, the compiler
+	  tries to reduce code size and execution time, without
+	  performing any optimizations that take a great deal of
+	  compilation time. -O turns on the following optimization
+	  flags: -fdefer-pop -fdelayed-branch -fguess-branch-probability
+	  -fcprop-registers -floop-optimize -fif-conversion
+	  -fif-conversion2 -ftree-ccp -ftree-dce -ftree-dominator-opts
+	  -ftree-dse -ftree-ter -ftree-lrs -ftree-sra -ftree-copyrename
+	  -ftree-fre -ftree-ch -funit-at-a-time -fmerge-constants. -O
+	  also turns on -fomit-frame-pointer on machines where doing so
+	  does not interfere with debugging.
+
+config BR2_OPTIMIZE_2
+	bool "optimization level 2"
+	help
+	  Optimize even more. GCC performs nearly all supported
+	  optimizations that do not involve a space-speed tradeoff. The
+	  compiler does not perform loop unrolling or function inlining
+	  when you specify -O2. As compared to -O, this option increases
+	  both compilation time and the performance of the generated
+	  code. -O2 turns on all optimization flags specified by -O. It
+	  also turns on the following optimization flags:
+	  -fthread-jumps -fcrossjumping -foptimize-sibling-calls
+	  -fcse-follow-jumps -fcse-skip-blocks -fgcse  -fgcse-lm
+	  -fexpensive-optimizations -fstrength-reduce
+	  -frerun-cse-after-loop -frerun-loop-opt -fcaller-saves
+	  -fpeephole2 -fschedule-insns -fschedule-insns2
+	  -fsched-interblock -fsched-spec -fregmove -fstrict-aliasing
+	  -fdelete-null-pointer-checks -freorder-blocks
+	  -freorder-functions -falign-functions -falign-jumps
+	  -falign-loops -falign-labels -ftree-vrp -ftree-pre. Please
+	  note the warning under -fgcse about invoking -O2 on programs
+	  that use computed gotos.
+
+config BR2_OPTIMIZE_3
+	bool "optimization level 3"
+	help
+	  Optimize yet more. -O3 turns on all optimizations specified by
+	  -O2 and also turns on the -finline-functions, -funswitch-loops
+	  and -fgcse-after-reload options.
+
+config BR2_OPTIMIZE_G
+	bool "optimize for debugging"
+	depends on BR2_TOOLCHAIN_GCC_AT_LEAST_4_8
+	help
+	  Optimize for debugging. This enables optimizations that do not
+	  interfere with debugging. It should be the optimization level
+	  of choice for the standard edit-compile-debug cycle, offering
+	  a reasonable level of optimization while maintaining fast
+	  compilation and a good debugging experience.
+
+config BR2_OPTIMIZE_S
+	bool "optimize for size"
+	help
+	  Optimize for size. -Os enables all -O2 optimizations that do
+	  not typically increase code size. It also performs further
+	  optimizations designed to reduce code size. -Os disables the
+	  following optimization flags: -falign-functions -falign-jumps
+	  -falign-loops -falign-labels -freorder-blocks
+	  -freorder-blocks-and-partition -fprefetch-loop-arrays
+	  -ftree-vect-loop-version
+	  This is the default.
+
+config BR2_OPTIMIZE_FAST
+	bool "optimize for fast"
+	depends on BR2_TOOLCHAIN_GCC_AT_LEAST_4_6
+	help
+	  Optimize for fast. Disregard strict standards
+	  compliance. -Ofast enables all -O3 optimizations. It also
+	  enables optimizations that are not valid for all
+	  standard-compliant programs. It turns on -ffast-math and the
+	  Fortran-specific -fstack-arrays, unless -fmax-stack-var-size
+	  is specified, and -fno-protect-parens.
+
+endchoice
+
+config BR2_GOOGLE_BREAKPAD_ENABLE
+	bool "Enable google-breakpad support"
+	depends on BR2_INSTALL_LIBSTDCPP
+	depends on BR2_HOST_GCC_AT_LEAST_4_8 # C++11
+	depends on BR2_TOOLCHAIN_GCC_AT_LEAST_4_8 # C++11
+	depends on BR2_USE_WCHAR
+	depends on BR2_TOOLCHAIN_HAS_THREADS
+	depends on (BR2_TOOLCHAIN_USES_GLIBC || BR2_TOOLCHAIN_USES_UCLIBC)
+	depends on BR2_PACKAGE_GOOGLE_BREAKPAD_ARCH_SUPPORTS
+	depends on BR2_PACKAGE_HOST_GOOGLE_BREAKPAD_ARCH_SUPPORTS
+	select BR2_PACKAGE_GOOGLE_BREAKPAD
+	help
+	  This option will enable the use of google breakpad, a library
+	  and tool suite that allows you to distribute an application to
+	  users with compiler-provided debugging information removed,
+	  record crashes in compact "minidump" files, send them back to
+	  your server and produce C and C++ stack traces from these
+	  minidumps. Breakpad can also write minidumps on request for
+	  programs that have not crashed.
+
+if BR2_GOOGLE_BREAKPAD_ENABLE
+
+config BR2_GOOGLE_BREAKPAD_INCLUDE_FILES
+	string "List of executables and libraries to extract symbols from"
+	default ""
+	help
+	  You may specify a space-separated list of binaries and
+	  libraries with full paths relative to $(TARGET_DIR) of which
+	  debug symbols will be dumped for further use with google
+	  breakpad.
+
+	  A directory structure that can be used by minidump-stackwalk
+	  will be created at:
+
+	  $(STAGING_DIR)/usr/share/google-breakpad-symbols
+
+endif
+
+choice
+	bool "libraries"
+	default BR2_SHARED_LIBS if BR2_BINFMT_SUPPORTS_SHARED
+	default BR2_STATIC_LIBS if !BR2_BINFMT_SUPPORTS_SHARED
+	help
+	  Select the type of libraries you want to use on the target.
+
+	  The default is to build dynamic libraries and use those on the
+	  target filesystem, except when the architecture and/or the
+	  selected binary format does not support shared libraries.
+
+config BR2_STATIC_LIBS
+	bool "static only"
+	help
+	  Build and use only static libraries. No shared libraries will
+	  be installed on the target. This potentially increases your
+	  code size and should only be used if you know what you are
+	  doing. Note that some packages may not be available when this
+	  option is enabled, due to their need for dynamic library
+	  support.
+
+config BR2_SHARED_LIBS
+	bool "shared only"
+	depends on BR2_BINFMT_SUPPORTS_SHARED
+	help
+	  Build and use only shared libraries. This is the recommended
+	  solution as it saves space and build time.
+
+config BR2_SHARED_STATIC_LIBS
+	bool "both static and shared"
+	depends on BR2_BINFMT_SUPPORTS_SHARED
+	help
+	  Build both shared and static libraries, but link executables
+	  dynamically. While building both shared and static libraries
+	  take more time and more disk space, having static libraries
+	  may be useful to link some of the applications statically.
+
+endchoice
+
+config BR2_PACKAGE_OVERRIDE_FILE
+	string "location of a package override file"
+	default "$(CONFIG_DIR)/local.mk"
+	help
+	  A package override file is a short makefile that contains
+	  variable definitions of the form <pkg>_OVERRIDE_SRCDIR, which
+	  allows to tell Buildroot to use an existing directory as the
+	  source directory for a particular package. See the Buildroot
+	  documentation for more details on this feature.
+
+config BR2_GLOBAL_PATCH_DIR
+	string "global patch directories"
+	help
+	  You may specify a space separated list of one or more
+	  directories containing global package patches. For a specific
+	  version <packageversion> of a specific package <packagename>,
+	  patches are applied as follows:
+
+	  First, the default Buildroot patch set for the package is
+	  applied from the package's directory in Buildroot.
+
+	  Then for every directory - <global-patch-dir> - that exists in
+	  BR2_GLOBAL_PATCH_DIR, if the directory
+	  <global-patch-dir>/<packagename>/<packageversion>/ exists,
+	  then all *.patch files in this directory will be applied.
+
+	  Otherwise, if the directory <global-patch-dir>/<packagename>
+	  exists, then all *.patch files in the directory will be
+	  applied.
+
+menu "Advanced"
+
+config BR2_COMPILER_PARANOID_UNSAFE_PATH
+	bool "paranoid check of library/header paths"
+	default y
+	help
+	  By default, when this option is disabled, when the Buildroot
+	  cross-compiler will encounter an unsafe library or header path
+	  (such as /usr/include, or /usr/lib), the compiler will display
+	  a warning.
+
+	  By enabling this option, this warning is turned into an error,
+	  which will completely abort the build when such unsafe paths
+	  are encountered.
+
+	  Note that this mechanism is available for both the internal
+	  toolchain (through the toolchain wrapper and binutils patches)
+	  and external toolchain backends (through the toolchain
+	  wrapper).
+
+config BR2_FORCE_HOST_BUILD
+	bool "Force the building of host dependencies"
+	help
+	  Build all available host dependencies, even if they are
+	  already installed on the system.
+
+	  This option can be used to ensure that the download cache of
+	  source archives for packages remain consistent between
+	  different build hosts.
+
+	  This option will increase build time.
+
+config BR2_REPRODUCIBLE
+	bool "Make the build reproducible (experimental)"
+	# SOURCE_DATE_EPOCH support in toolchain-wrapper requires GCC 4.4
+	depends on BR2_TOOLCHAIN_GCC_AT_LEAST_4_4
+	help
+	  This option will remove all sources of non-reproducibility
+	  from the build process. For a given Buildroot configuration,
+	  this allows to generate exactly identical binaries from one
+	  build to the other, including on different machines.
+
+	  The current implementation is restricted to builds with the
+	  same output directory. Many (absolute) paths are recorded in
+	  intermediary files, and it is very likely that some of these
+	  paths leak into the target rootfs. If you build with the
+	  same O=... path, however, the result is identical.
+
+	  This is labeled as an experimental feature, as not all
+	  packages behave properly to ensure reproducibility.
+
+endmenu
+
+comment "Security Hardening Options"
+
+choice
+	bool "Stack Smashing Protection"
+	default BR2_SSP_ALL if BR2_ENABLE_SSP # legacy
+	depends on BR2_TOOLCHAIN_HAS_SSP
+	help
+	  Enable stack smashing protection support using GCC's
+	  -fstack-protector option family.
+
+	  See
+	  http://www.linuxfromscratch.org/hints/downloads/files/ssp.txt
+	  for details.
+
+	  Note that this requires the toolchain to have SSP support.
+	  This is always the case for glibc and eglibc toolchain, but is
+	  optional in uClibc toolchains.
+
+config BR2_SSP_NONE
+	bool "None"
+	help
+	  Disable stack-smashing protection.
+
+config BR2_SSP_REGULAR
+	bool "-fstack-protector"
+	help
+	  Emit extra code to check for buffer overflows, such as stack
+	  smashing attacks. This is done by adding a guard variable to
+	  functions with vulnerable objects. This includes functions
+	  that call alloca, and functions with buffers larger than 8
+	  bytes. The guards are initialized when a function is entered
+	  and then checked when the function exits. If a guard check
+	  fails, an error message is printed and the program exits.
+
+config BR2_SSP_STRONG
+	bool "-fstack-protector-strong"
+	depends on BR2_TOOLCHAIN_GCC_AT_LEAST_4_9
+	help
+	  Like -fstack-protector but includes additional functions to be
+	  protected - those that have local array definitions, or have
+	  references to local frame addresses.
+
+comment "Stack Smashing Protection strong needs a toolchain w/ gcc >= 4.9"
+	depends on !BR2_TOOLCHAIN_GCC_AT_LEAST_4_9
+
+config BR2_SSP_ALL
+	bool "-fstack-protector-all"
+	help
+	  Like -fstack-protector except that all functions are
+	  protected. This option might have a significant performance
+	  impact on the compiled binaries.
+
+endchoice
+
+config BR2_SSP_OPTION
+	string
+	default "-fstack-protector"        if BR2_SSP_REGULAR
+	default "-fstack-protector-strong" if BR2_SSP_STRONG
+	default "-fstack-protector-all"    if BR2_SSP_ALL
+
+comment "Stack Smashing Protection needs a toolchain w/ SSP"
+	depends on !BR2_TOOLCHAIN_HAS_SSP
+
+choice
+	bool "RELRO Protection"
+	depends on BR2_SHARED_LIBS
+	help
+	  Enable a link-time protection know as RELRO (RELocation Read
+	  Only) which helps to protect from certain type of exploitation
+	  techniques altering the content of some ELF sections.
+
+config BR2_RELRO_NONE
+	bool "None"
+	help
+	  Disables Relocation link-time protections.
+
+config BR2_RELRO_PARTIAL
+	bool "Partial"
+	help
+	  This option makes the dynamic section not writeable after
+	  initialization (with almost no performance penalty).
+
+config BR2_RELRO_FULL
+	bool "Full"
+	help
+	  This option includes the partial configuration, but also marks
+	  the GOT as read-only at the cost of initialization time during
+	  program loading, i.e every time an executable is started.
+
+endchoice
+
+comment "RELocation Read Only (RELRO) needs shared libraries"
+	depends on !BR2_SHARED_LIBS
+
+choice
+	bool "Buffer-overflow Detection (FORTIFY_SOURCE)"
+	depends on BR2_TOOLCHAIN_USES_GLIBC
+	depends on !BR2_OPTIMIZE_0
+	help
+	  Enable the _FORTIFY_SOURCE macro which introduces additional
+	  checks to detect buffer-overflows in the following standard
+	  library functions: memcpy, mempcpy, memmove, memset, strcpy,
+	  stpcpy, strncpy, strcat, strncat, sprintf, vsprintf, snprintf,
+	  vsnprintf, gets.
+
+	  NOTE: This feature requires an optimization level of s/1/2/3/g
+
+	  Support for this feature has been present since GCC 4.x.
+
+config BR2_FORTIFY_SOURCE_NONE
+	bool "None"
+	help
+	  Disables additional checks to detect buffer-overflows.
+
+config BR2_FORTIFY_SOURCE_1
+	bool "Conservative"
+	# gcc bug https://gcc.gnu.org/bugzilla/show_bug.cgi?id=61164
+	depends on !BR2_TOOLCHAIN_BUILDROOT || BR2_TOOLCHAIN_GCC_AT_LEAST_6
+	help
+	  This option sets _FORTIFY_SOURCE to 1 and only introduces
+	  checks that shouldn't change the behavior of conforming
+	  programs.  Adds checks at compile-time only.
+
+config BR2_FORTIFY_SOURCE_2
+	bool "Aggressive"
+	# gcc bug https://gcc.gnu.org/bugzilla/show_bug.cgi?id=61164
+	depends on !BR2_TOOLCHAIN_BUILDROOT || BR2_TOOLCHAIN_GCC_AT_LEAST_6
+	help
+	  This option sets _FORTIFY_SOURCES to 2 and some more
+	  checking is added, but some conforming programs might fail.
+	  Also adds checks at run-time (detected buffer overflow
+	  terminates the program)
+
+endchoice
+
+comment "Fortify Source needs a glibc toolchain and optimization"
+	depends on (!BR2_TOOLCHAIN_USES_GLIBC || BR2_OPTIMIZE_0)
+endmenu
+
+source "toolchain/Config.in"
+
+source "system/Config.in"
+
+source "linux/Config.in"
+
+source "package/Config.in"
+
+source "fs/Config.in"
+
+source "boot/Config.in"
+
+source "package/Config.in.host"
+
+source "Config.in.legacy"
+
+source "$BR2_BUILD_DIR/.br2-external.in"
