@@ -1,14 +1,5 @@
 config BR2_PACKAGE_OPENJDK
 	bool "openjdk"
-	select BR2_PACKAGE_LIBUSB
-	select BR2_PACKAGE_ALSA_LIB
-	select BR2_PACKAGE_LIBGTK2
-	select BR2_PACKAGE_CUPS
-	select BR2_PACKAGE_GIFLIB
-	select BR2_PACKAGE_JPEG
-	select BR2_PACKAGE_XLIB_LIBXT
-	select BR2_PACKAGE_XLIB_LIBXTST
-	select BR2_PACKAGE_ELFUTILS
 	select BR2_PACKAGE_BUILDROOT_LOCALE
 	select BR2_PTHREAD_DEBUG
 	depends on BR2_TOOLCHAIN_HAS_THREADS
@@ -16,3 +7,746 @@ config BR2_PACKAGE_OPENJDK
 	  OpenJDK JRE runtime.
 
 	  http://openjdk.java.net/
+
+if BR2_PACKAGE_OPENJDK
+
+#
+# Version selection. We provide the choice between:
+#
+#  1. An LTS release version
+#  2. The latest release version (may be the same as LTS)
+#  3. A specified custom project/release/version from hg.openjdk.java.net
+#
+
+        choice
+		prompt "OpenJDK version"
+
+		config BR2_PACKAGE_OPENJDK_LTS
+			bool "Latest LTS version (jdk-updates/jdk11u/jdk-11.0.1+13)"
+			help
+			  The current (and first) LTS version released October 2018.
+
+		config BR2_PACKAGE_OPENJDK_LATEST
+			bool "Latest version (jdk-updates/jdk11u/jdk-11.0.1+13)"
+			help
+			  The current version released October 2018.
+
+		config BR2_PACKAGE_OPENJDK_CUSTOM_OJN
+			bool "Specify a version from the OpenJDK Mercurial Repository"
+			help
+			  A custom version specified by project/release/branch from the mercurial repository hg.openjdk.java.net.
+
+		config BR2_PACKAGE_OPENJDK_CUSTOM_TARBALL
+			bool "Custom tarball"
+			help
+			  This option allows to specify a URL pointing to a kernel
+			  source tarball. This URL can use any protocol recognized by
+			  Buildroot, like http://, ftp://, file:// or scp://.
+
+			  When pointing to a local tarball using file://, you may want
+			  to use a make variable like $(TOPDIR) to reference the root of
+			  the Buildroot tree.
+
+		config BR2_PACKAGE_OPENJDK_CUSTOM_GIT
+			bool "Custom Git repository"
+			help
+			  This option allows Buildroot to get the Linux kernel source
+			  code from a Git repository.
+
+		config BR2_PACKAGE_OPENJDK_CUSTOM_HG
+			bool "Custom Mercurial repository"
+			help
+			  This option allows Buildroot to get the Linux kernel source
+			  code from a Mercurial repository.
+
+		config BR2_PACKAGE_OPENJDK_CUSTOM_SVN
+			bool "Custom Subversion repository"
+			help
+			  This option allows Buildroot to get the Linux kernel source
+			  code from a Subversion repository.
+
+	endchoice
+
+	
+	if BR2_PACKAGE_OPENJDK_CUSTOM_OJN
+
+		config BR2_PACKAGE_OPENJDK_CUSTOM_OJN_PROJECT
+			string "OpenJDK Project"
+			default "jdk-updates"
+			help
+			  The top branch at hg.openjdk.java.net (e.g. jdk-updates)
+
+		config BR2_PACKAGE_OPENJDK_CUSTOM_OJN_RELEASE
+			string "OpenJDK Release"
+			default "jdk11u"
+			help
+			  The second-from-top branch at hg.openjdk.java.net (e.g. jdk11u)
+
+		config BR2_PACKAGE_OPENJDK_CUSTOM_OJN_VERSION
+			string "OpenJDK Release"
+			default "jdk-11.0.1+13"
+			help
+			  The complete version title at hg.openjdk.java.net (e.g. jdk-11.0.1+13)
+	endif
+
+	config BR2_PACKAGE_OPENJDK_CUSTOM_TARBALL_LOCATION
+		string "URL of custom kernel tarball"
+		depends on BR2_PACKAGE_OPENJDK_CUSTOM_TARBALL
+
+	if BR2_PACKAGE_OPENJDK_CUSTOM_GIT || BR2_PACKAGE_OPENJDK_CUSTOM_HG || BR2_PACKAGE_OPENJDK_CUSTOM_SVN
+
+		config BR2_PACKAGE_OPENJDK_CUSTOM_REPO_URL
+			string "URL of custom repository"
+
+		config BR2_PACKAGE_OPENJDK_CUSTOM_REPO_VERSION
+			string "Custom repository version"
+			help
+			  Revision to use in the typical format used by
+			  Git/Mercurial/Subversion E.G. a sha id, a tag, branch, ..
+
+	endif
+
+#
+# Build type selection. We provide the choice between:
+#
+#  1. JRE
+#  2. JDK
+#
+        choice
+		prompt "Build type"
+
+	config BR2_PACKAGE_OPENJDK_JRE
+		bool "JRE"
+		help
+		  Build only the JRE to run java applications.
+
+	config BR2_PACKAGE_OPENJDK_JDK
+		bool "JDK"
+		help
+		  Build the JDK to compile, link, debug, and run java code and applications.
+
+	endchoice
+
+#
+# Build type selection. We provide the choice between:
+#
+#  1. Headless
+#  2. WITH_X
+#
+        choice
+		prompt "Graphical Interface"
+
+	config BR2_PACKAGE_OPENJDK_WITH_X
+		bool "With X"
+		comment "needs an X.Org server"
+		depends on BR2_PACKAGE_XORG7
+		help
+		  Build against X.Org to run graphical applications.
+
+	config BR2_PACKAGE_OPENJDK_HEADLESS
+		bool "Without X"
+		help
+		  Build without graphical output.
+
+	endchoice
+
+
+
+#
+# Modules selection. We provide the choice between:
+#
+#  1. java.SE
+#  2. All java.* (all java.* modules)
+#  3. All jdk.* (all java.* and jdk.* modules - only available in JDK build)
+#  4. Custom module selection
+#
+
+        choice
+		prompt "Modules"
+
+
+		config BR2_PACKAGE_OPENJDK_MODULES_JAVA_SE
+			bool "All the modules required by java.SE"
+			selects BR2_PACKAGE_OPENJDK_MODULE_JAVA_SE
+			help
+			  All the modules required by java.SE:
+			    java.sql.rowset
+			      java.sql
+			        java.logging
+				  java.base
+			        java.xml
+				  java.base
+			        java.transaction.xa
+				  java.base
+			      java.naming
+				java.base
+			    java.scripting
+			      java.base
+			    java.xml.crypto
+			      java.xml
+				java.base
+			    java.desktop
+			      java.xml
+				java.base
+			      java.datatransfer
+				java.base
+			    java.compiler
+			      java.base
+			    java.instrument
+			      java.base
+			    java.management.rmi
+			      java.management
+				java.base
+			      java.rmi
+				java.base
+			    java.net.http
+			      java.base
+			    java.prefs
+			      java.base
+			    java.security.jgss
+			      java.base
+			    java.security.sasl
+			      java.base
+
+
+		config BR2_PACKAGE_OPENJDK_MODULES_JAVA_ALL
+			bool "Select all the java.* modules available"
+			selects BR2_PACKAGE_OPENJDK_MODULE_JAVA_SE
+		        selects BR2_PACKAGE_OPENJDK_MODULE_JAVA_SMARTCARDIO
+			help
+			  All the modules required by java.SE plus:
+			    java.smartcardio
+
+		config BR2_PACKAGE_OPENJDK_MODULES_JDK_ALL
+			bool "Select all the java.* and jdk.* modules available"
+			depends on BR2_PACKAGE_OPENJDK_JDK
+			selects BR2_PACKAGE_OPENJDK_MODULE_JAVA_SE
+		        selects BR2_PACKAGE_OPENJDK_MODULE_JAVA_SMARTCARDIO
+		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_ACCESSIBILITY
+		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_ATTACH
+		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_CHARSETS
+		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_COMPILER
+		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_CRYPTO_CRYPTOKI
+		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_CRYPTO_EC
+		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_DYNALINK
+		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_EDITPAD
+		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_HOTSPOT_AGENT
+		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_HTTPSERVER
+		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_JARTOOL
+		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_JAVADOC
+		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_JCMD
+		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_JCONSOLE
+		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_JDEPS
+		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_JDI
+		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_JDWP_AGENT
+		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_JFR
+		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_JLINK
+		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_JSHELL
+		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_JSOBJECT
+		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_JSTATD
+		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_LOCALEDATA
+		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_MANAGEMENT
+		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_MANAGEMENT_AGENT
+		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_MANAGEMENT_JFR
+		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_NAMING_DNS
+		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_NAMING_RMI
+		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_NET
+		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_PACK
+		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_RMIC
+		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_SCRIPTING_NASHORN
+		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_SCTP
+		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_SECURITY_AUTH
+		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_SECURITY_JGSS
+		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_XML_DOM
+		        selects BR2_PACKAGE_OPENJDK_MODULE_JDK_ZIPFS
+			help
+			  All the modules required by java plus:
+			    jdk.accessibility
+			      java.desktop
+			        java.xml
+				  java.base
+			        java.datatransfer
+				  java.base
+			    jdk.attach
+			      java.base
+			    jdk.charsets
+			      java.base
+			    jdk.compiler
+			      java.compiler
+			        java.base
+			    jdk.crypto.cryptoki
+			      java.base
+			    jdk.crypto.ec
+			      java.base
+			    jdk.dynalink
+			      java.base
+			    jdk.editpad
+			      java.base
+			    jdk.hotspot.agent
+			      java.base
+			    jdk.httpserver
+			      java.base
+			    jdk.jartool
+			      java.base
+			    jdk.javadoc
+			      jdk.compiler
+			        java.compiler
+			          java.base
+			    jdk.jcmd
+			      java.base
+			    jdk.jconsole
+ 			      java.desktop
+			        java.xml
+				  java.base
+			        java.datatransfer
+				  java.base
+			      java.management
+				java.base
+			    jdk.jdeps
+			      java.base
+			    jdk.jdi
+			      java.base
+			    jdk.jdwp.agent
+			      java.base
+			    jdk.jfr
+			      java.base
+			    jdk.jlink
+			      java.base
+			    jdk.jshell
+			      java.compiler
+			        java.base
+			      java.prefs
+			        java.base
+			      jdk.jdi
+			        java.base
+			    jdk.jsobject
+			      java.base
+			    jdk.jstatd
+			      java.base
+			    jdk.localedata
+			      java.base
+			    jdk.management
+			      java.management
+			        java.base
+			    jdk.management.agent
+			      java.base
+			    jdk.management.jfr
+			      java.management
+			        java.base
+			    jdk.naming.dns
+			      java.base
+			    jdk.naming.rmi
+			      java.base
+			    jdk.net
+			      java.base
+			    jdk.pack
+			      java.base
+			    jdk.rmic
+			      java.base
+			    jdk.scripting.nashorn
+			      java.scripting
+			        java.base
+			    jdk.sctp
+			      java.base
+			    jdk.security.auth
+			      java.naming
+				java.base
+			    jdk.security.jgss
+			      java.security.jgss
+				java.base
+			    jdk.xml.dom
+			      java.xml
+				java.base
+			    jdk.zipfs
+			      java.base
+
+
+
+	config BR2_PACKAGE_OPENJDK_MODULES
+		menu "choose specific modules"
+
+	if BR2_PACKAGE_OPENJDK_MODULES
+		config BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
+			bool "java.base"
+			depends on BR2_PACKAGE_OPENJDK_MODULES
+			help
+				Defines the foundational APIs of the Java SE Platform.
+
+		config BR2_PACKAGE_OPENJDK_MODULE_JAVA_COMPILER
+			bool "java.compiler"
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
+			help
+				Defines the Language Model, Annotation Processing, and Java Compiler APIs.
+
+		config BR2_PACKAGE_OPENJDK_MODULE_JAVA_DATATRANSFER
+			bool "java.datatransfer"
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
+			help
+				Defines the API for transferring data between and within applications.
+
+		config BR2_PACKAGE_OPENJDK_MODULE_JAVA_DESKTOP
+			bool "java.desktop"
+			comment "The java.desktop module requires X."
+			    depends on BR2_PACKAGE_OPENJDK_WITH_X
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_XML
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_DATATRANSFER
+			select BR2_PACKAGE_ALSA_LIB
+			select BR2_PACKAGE_CUPS
+			select BR2_PACKAGE_GIFLIB
+			select BR2_PACKAGE_JPEG
+			select BR2_PACKAGE_LIBGTK2
+			select BR2_PACKAGE_LIBUSB
+			select BR2_PACKAGE_XLIB_LIBXT
+			select BR2_PACKAGE_XLIB_LIBXTST
+			help
+				Defines the AWT and Swing user interface toolkits, plus APIs for accessibility, audio, imaging, printing, and JavaBeans.
+
+		config BR2_PACKAGE_OPENJDK_MODULE_JAVA_INSTRUMENT
+			bool "java.instrument"
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
+			help
+				Defines services that allow agents to instrument programs running on the JVM.
+
+		config BR2_PACKAGE_OPENJDK_MODULE_JAVA_LOGGING
+			bool "java.logging"
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
+			help
+				Defines the Java Logging API.
+
+		config BR2_PACKAGE_OPENJDK_MODULE_JAVA_MANAGEMENT
+			bool "java.management"
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
+			help
+				Defines the Java Management Extensions (JMX) API.
+
+		config BR2_PACKAGE_OPENJDK_MODULE_JAVA_MANAGEMENT_RMI
+			bool "java.management.rmi"
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_MANAGEMENT
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_RMI
+			help
+				Defines the RMI connector for the Java Management Extensions (JMX) Remote API.
+
+		config BR2_PACKAGE_OPENJDK_MODULE_JAVA_NAMING
+			bool "java.naming"
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
+			help
+				Defines the Java Naming and Directory Interface (JNDI) API.
+
+		config BR2_PACKAGE_OPENJDK_MODULE_JAVA_NET_HTTP
+			bool "java.net.http"
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
+			help
+				Defines the HTTP Client and WebSocket APIs.
+
+		config BR2_PACKAGE_OPENJDK_MODULE_JAVA_PREFS
+			bool "java.prefs"
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
+			help
+				Defines the Preferences API.
+
+		config BR2_PACKAGE_OPENJDK_MODULE_JAVA_RMI
+			bool "java.rmi"
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
+			help
+				Defines the Remote Method Invocation (RMI) API.
+
+		config BR2_PACKAGE_OPENJDK_MODULE_JAVA_SCRIPTING
+			bool "java.scripting"
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
+			help
+				Defines the Scripting API.
+
+		config BR2_PACKAGE_OPENJDK_MODULE_JAVA_SE
+			bool "java.se"
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_SQL_ROWSET
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_SCRIPTING
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_XML_CRYPTO
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_DESKTOP
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_COMPILER
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_INSTRUMENT
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_MANAGEMENT_RMI
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_NET_HTTP
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_PREFS
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_SECURITY_JGSS
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_SECURITY_SASL
+			help
+				Defines the API of the Java SE Platform.
+
+		config BR2_PACKAGE_OPENJDK_MODULE_JAVA_SECURITY_JGSS
+			bool "java.security.jgss"
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
+			help
+				Defines the Java binding of the IETF Generic Security Services API (GSS-API).
+
+		config BR2_PACKAGE_OPENJDK_MODULE_JAVA_SECURITY_SASL
+			bool "java.security.sasl"
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
+			help
+				Defines Java support for the IETF Simple Authentication and Security Layer (SASL).
+
+		config BR2_PACKAGE_OPENJDK_MODULE_JAVA_SMARTCARDIO
+			bool "java.smartcardio"
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
+			help
+				Defines the Java Smart Card I/O API.
+
+		config BR2_PACKAGE_OPENJDK_MODULE_JAVA_SQL
+			bool "java.sql"
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_LOGGING
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_XML
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_TRANSACTION_XA
+			help
+				Defines the JDBC API.
+
+		config BR2_PACKAGE_OPENJDK_MODULE_JAVA_SQL_ROWSET
+			bool "java.sql.rowset"
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_SQL
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_NAMING
+			help
+				Defines the JDBC RowSet API.
+
+		config BR2_PACKAGE_OPENJDK_MODULE_JAVA_TRANSACTION_XA
+			bool "java.transaction.xa"
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
+			help
+				Defines an API for supporting distributed transactions in JDBC.
+
+		config BR2_PACKAGE_OPENJDK_MODULE_JAVA_XML
+			bool "java.xml"
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
+			help
+				Defines the Java API for XML Processing (JAXP), the Streaming API for XML (StAX), the Simple API for XML (SAX), and the W3C Document Object Model (DOM) API.
+
+		config BR2_PACKAGE_OPENJDK_MODULE_JAVA_XML_CRYPTO
+			bool "java.xml.crypto"
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_XML
+			help
+				Defines the API for XML cryptography.
+
+		config BR2_PACKAGE_OPENJDK_MODULE_JDK_ACCESSIBILITY
+			bool "jdk.accessibility"
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_DESKTOP
+			help
+				Defines JDK utility classes used by implementors of Assistive Technologies.
+
+		config BR2_PACKAGE_OPENJDK_MODULE_JDK_ATTACH
+			bool "jdk.attach"
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
+			help
+				Defines the attach API.
+
+		config BR2_PACKAGE_OPENJDK_MODULE_JDK_CHARSETS
+			bool "jdk.charsets"
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
+			help
+				Provides charsets that are not in java.base (mostly double byte and IBM charsets).
+
+		config BR2_PACKAGE_OPENJDK_MODULE_JDK_COMPILER
+			bool "jdk.compiler"
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_COMPILER
+			help
+				Defines the implementation of the system Java compiler and its command line equivalent, javac.
+
+		config BR2_PACKAGE_OPENJDK_MODULE_JDK_CRYPTO_CRYPTOKI
+			bool "jdk.crypto.cryptoki"
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
+			help
+				Provides the implementation of the SunPKCS11 security provider.
+
+		config BR2_PACKAGE_OPENJDK_MODULE_JDK_CRYPTO_EC
+			bool "jdk.crypto.ec"
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
+			help
+				Provides the implementation of the SunEC security provider.
+
+		config BR2_PACKAGE_OPENJDK_MODULE_JDK_DYNALINK
+			bool "jdk.dynalink"
+		**        select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
+			help
+				Defines the API for dynamic linking of high-level operations on objects.
+
+		config BR2_PACKAGE_OPENJDK_MODULE_JDK_EDITPAD
+			bool "jdk.editpad"
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
+			help
+				Provides the implementation of the edit pad service used by jdk.jshell.
+
+		config BR2_PACKAGE_OPENJDK_MODULE_JDK_HOTSPOT_AGENT
+			bool "jdk.hotspot.agent"
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
+			help
+				Defines the implementation of the HotSpot Serviceability Agent.
+
+		config BR2_PACKAGE_OPENJDK_MODULE_JDK_HTTPSERVER
+			bool "jdk.httpserver"
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
+			help
+				Defines the JDK-specific HTTP server API.
+
+
+		config BR2_PACKAGE_OPENJDK_MODULE_JDK_JARTOOL
+			bool "jdk.jartool"
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
+			help
+				Defines tools for manipulating Java Archive (JAR) files, including the jar and jarsigner tools.
+
+		config BR2_PACKAGE_OPENJDK_MODULE_JDK_JAVADOC
+			bool "jdk.javadoc"
+			select BR2_PACKAGE_OPENJDK_MODULE_JDK_COMPILER
+			help
+				Defines the implementation of the system documentation tool and its command line equivalent, javadoc.
+
+		config BR2_PACKAGE_OPENJDK_MODULE_JDK_JCMD
+			bool "jdk.jcmd"
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
+			help
+				Defines tools for diagnostics and troubleshooting a JVM such as the jcmd, jps, jstat tools.
+
+		config BR2_PACKAGE_OPENJDK_MODULE_JDK_JCONSOLE
+			bool "jdk.jconsole"
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_DESKTOP
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_MANAGEMENT
+			help
+				Defines the JMX graphical tool, jconsole, for monitoring and managing a running application.
+
+		config BR2_PACKAGE_OPENJDK_MODULE_JDK_JDEPS
+			bool "jdk.jdeps"
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
+			help
+				Defines tools for analysing dependencies in Java libraries and programs, including the jdeps, javap, and jdeprscan tools.
+
+		config BR2_PACKAGE_OPENJDK_MODULE_JDK_JDI
+			bool "jdk.jdi"
+		**        select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
+			help
+				Defines the Java Debug Interface.
+
+		config BR2_PACKAGE_OPENJDK_MODULE_JDK_JDWP_AGENT
+			bool "jdk.jdwp.agent"
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
+			help
+				Provides the implementation of the Java Debug Wire Protocol (JDWP) agent.
+
+		config BR2_PACKAGE_OPENJDK_MODULE_JDK_JFR
+			bool "jdk.jfr"
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
+			help
+				Defines the API for JDK Flight Recorder.
+
+		config BR2_PACKAGE_OPENJDK_MODULE_JDK_JLINK
+			bool "jdk.jlink"
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
+			help
+				Defines the jlink tool for creating run-time images, the jmod tool for creating and manipulating JMOD files, and the jimage tool for inspecting the JDK implementation-specific container file for classes and resources.
+
+		config BR2_PACKAGE_OPENJDK_MODULE_JDK_JSHELL
+			bool "jdk.jshell"
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_COMPILER
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_PREFS
+			select BR2_PACKAGE_OPENJDK_MODULE_JDK_JDI
+			help
+				This module provides support for Java Programming Language 'snippet' evaluating tools, such as Read-Eval-Print Loops (REPLs), including the jshell tool.
+
+		config BR2_PACKAGE_OPENJDK_MODULE_JDK_JSOBJECT
+			bool "jdk.jsobject"
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
+			help
+				Defines the API for the JavaScript Object.
+
+		config BR2_PACKAGE_OPENJDK_MODULE_JDK_JSTATD
+			bool "jdk.jstatd"
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
+			help
+				Defines the jstatd tool for starting a daemon for the jstat tool to monitor JVM statistics remotely.
+
+		config BR2_PACKAGE_OPENJDK_MODULE_JDK_LOCALEDATA
+			bool "jdk.localedata"
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
+			help
+				Provides the locale data for locales other than US locale.
+
+		config BR2_PACKAGE_OPENJDK_MODULE_JDK_MANAGEMENT
+			bool "jdk.management"
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_MANAGEMENT
+			help
+				Defines JDK-specific management interfaces for the JVM.
+
+		config BR2_PACKAGE_OPENJDK_MODULE_JDK_MANAGEMENT_AGENT
+			bool "jdk.management.agent"
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
+			help
+				Defines the JMX management agent.
+
+		config BR2_PACKAGE_OPENJDK_MODULE_JDK_MANAGEMENT_JFR
+			bool "jdk.management.jfr"
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_MANAGEMENT
+			help
+				Defines the Management Interface for JDK Flight Recorder.
+
+		config BR2_PACKAGE_OPENJDK_MODULE_JDK_NAMING_DNS
+			bool "jdk.naming.dns"
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
+			help
+				Provides the implementation of the DNS Java Naming provider.
+
+		config BR2_PACKAGE_OPENJDK_MODULE_JDK_NAMING_RMI
+			bool "jdk.naming.rmi"
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
+			help
+				Provides the implementation of the RMI Java Naming provider.
+
+		config BR2_PACKAGE_OPENJDK_MODULE_JDK_NET
+			bool "jdk.net"
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
+			help
+				Defines the JDK-specific Networking API.
+
+		config BR2_PACKAGE_OPENJDK_MODULE_JDK_PACK
+			bool "jdk.pack **DEPRECATED**"
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
+			help
+				Defines tools for transforming a JAR file into a compressed pack200 file and transforming a packed file into a JAR file, including the pack200 and unpack200 tools.
+
+		config BR2_PACKAGE_OPENJDK_MODULE_JDK_RMIC
+			bool "jdk.rmic"
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
+			help
+				Defines the rmic compiler for generating stubs and skeletons using the Java Remote Method Protocol (JRMP) for remote objects.
+
+		config BR2_PACKAGE_OPENJDK_MODULE_JDK_SCRIPTING_NASHORN
+			bool "jdk.scripting.nashorn **DEPRECATED**"
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_SCRIPTING
+			help
+				Provides the implementation of Nashorn script engine and the runtime environment for programs written in ECMAScript 5.1.
+
+		config BR2_PACKAGE_OPENJDK_MODULE_JDK_SCTP
+			bool "jdk.sctp"
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
+			help
+				Defines the JDK-specific API for SCTP.
+
+		config BR2_PACKAGE_OPENJDK_MODULE_JDK_SECURITY_AUTH
+			bool "jdk.security.auth"
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_NAMING
+			help
+				Provides implementations of the javax.security.auth.* interfaces and various authentication modules.
+
+		config BR2_PACKAGE_OPENJDK_MODULE_JDK_SECURITY_JGSS
+			bool "jdk.security.jgss"
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_SECURITY_JGSS
+			help
+				Defines JDK extensions to the GSS-API and an implementation of the SASL GSSAPI mechanism.
+				
+		config BR2_PACKAGE_OPENJDK_MODULE_JDK_XML_DOM
+			bool "jdk.xml.dom"
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_XML
+			help
+				Defines the subset of the W3C Document Object Model (DOM) API that is not part of the Java SE API.
+
+		config BR2_PACKAGE_OPENJDK_MODULE_JDK_ZIPFS
+			bool "jdk.zipfs"
+			select BR2_PACKAGE_OPENJDK_MODULE_JAVA_BASE
+			help
+				Provides the implementation of the zip file system provider.
+
+
