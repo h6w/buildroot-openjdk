@@ -6,12 +6,14 @@
 
 #Version is the same as OpenJDK HG tag
 
-OPENJDK_VERSION = jdk-11.0.1+13
-OPENJDK_RELEASE = jdk11u
+OPENJDK_VERSION = jdk-12+33
+OPENJDK_RELEASE = jdk12u
 OPENJDK_PROJECT = jdk-updates
 OPENJDK_VARIANT = server
 OPENJDK_SOURCE = openjdk-$(OPENJDK_VERSION).tar.xz
 OPENJDK_SITE = https://hg.openjdk.java.net/$(OPENJDK_PROJECT)/$(OPENJDK_RELEASE)/
+OPENJDK_LICENSE = GPLv2+ with exception
+OPENJDK_LICENSE_FILES = COPYING
 
 
 export DISABLE_HOTSPOT_OS_VERSION_CHECK=ok
@@ -29,10 +31,19 @@ OPENJDK_MAKE_OPTS = \
 	$(OPENJDK_GENERAL_OPTS) \
         images
 
-OPENJDK_DEPENDENCIES = alsa-lib host-pkgconf libffi cups freetype xlib_libXrender xlib_libXt xlib_libXext xlib_libXtst libusb giflib jpeg
-
-OPENJDK_LICENSE = GPLv2+ with exception
-OPENJDK_LICENSE_FILES = COPYING
+OPENJDK_DEPENDENCIES = \
+	alsa-lib \
+	host-pkgconf \
+	libffi \
+	cups \
+	freetype \
+	xlib_libXrender \
+	xlib_libXt \
+	xlib_libXext \
+	xlib_libXtst \
+	libusb \
+	giflib \
+	jpeg
 
 define OPENJDK_CONFIGURE_CMDS
 	chmod +x $(@D)/configure
