@@ -1,5 +1,5 @@
---- openjdk-jdk-10.0.1+10/src/hotspot/share/runtime/java.cpp	2018-10-22 03:49:03.035613787 +0000
-+++ openjdk-jdk-10.0.1+10/src/hotspot/share/runtime/java.cpp	2018-10-22 03:05:43.001767411 +0000
+--- openjdk-12.0.1+12/src/hotspot/share/runtime/java.cpp	2018-10-22 03:49:03.035613787 +0000
++++ openjdk-12.0.1+12/src/hotspot/share/runtime/java.cpp	2018-10-22 03:05:43.001767411 +0000
 @@ -672,6 +672,11 @@
    assert(!_current.is_valid(), "Don't initialize twice");
  

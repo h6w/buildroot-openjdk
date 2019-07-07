@@ -1,5 +1,5 @@
---- openjdk-jdk-10.0.1+10/src/hotspot/os/linux/os_linux.cpp.orig	2018-07-16 07:10:02.962294766 +0000
-+++ openjdk-jdk-10.0.1+10/src/hotspot/os/linux/os_linux.cpp	2018-07-16 07:11:35.635970832 +0000
+--- openjdk-12.0.1+12/src/hotspot/os/linux/os_linux.cpp.orig	2018-07-16 07:10:02.962294766 +0000
++++ openjdk-12.0.1+12/src/hotspot/os/linux/os_linux.cpp	2018-07-16 07:11:35.635970832 +0000
 @@ -530,11 +530,17 @@
    #error "glibc too old (< 2.3.2)"
  #endif

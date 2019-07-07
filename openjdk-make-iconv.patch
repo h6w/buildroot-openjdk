@@ -1,5 +1,5 @@
---- openjdk-jdk-10.0.1+10/make/lib/Awt2dLibraries.gmk	2018-10-18 00:41:23.011330178 +0000
-+++ openjdk-jdk-10.0.1+10/make/lib/Awt2dLibraries.gmk	2018-10-18 00:42:30.387994505 +0000
+--- openjdk-12.0.1+12/make/lib/Awt2dLibraries.gmk	2018-10-18 00:41:23.011330178 +0000
++++ openjdk-12.0.1+12/make/lib/Awt2dLibraries.gmk	2018-10-18 00:42:30.387994505 +0000
 @@ -922,7 +922,7 @@
      LIBSPLASHSCREEN_LDFLAGS := -delayload:user32.dll
      LIBSPLASHSCREEN_LIBS += kernel32.lib user32.lib gdi32.lib delayimp.lib $(WIN_JAVA_LIB) jvm.lib
@@ -9,8 +9,8 @@
    endif
  
    $(eval $(call SetupNativeCompilation,BUILD_LIBSPLASHSCREEN, \
---- openjdk-jdk-10.0.1+10/make/lib/Lib-java.instrument.gmk	2018-10-18 00:43:20.764509642 +0000
-+++ openjdk-jdk-10.0.1+10/make/lib/Lib-java.instrument.gmk	2018-10-18 00:43:56.272881312 +0000
+--- openjdk-12.0.1+12/make/lib/Lib-java.instrument.gmk	2018-10-18 00:43:20.764509642 +0000
++++ openjdk-12.0.1+12/make/lib/Lib-java.instrument.gmk	2018-10-18 00:43:56.272881312 +0000
 @@ -69,7 +69,7 @@
      LDFLAGS_aix := -L$(SUPPORT_OUTPUTDIR)/native/java.base, \
      LIBS := $(JDKLIB_LIBS), \

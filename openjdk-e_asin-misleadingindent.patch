@@ -1,5 +1,5 @@
---- openjdk-jdk-10.0.1+10/src/java.base/share/native/libfdlibm/e_asin.c	2018-02-27 10:08:25.589121957 +1100
-+++ openjdk-jdk-10.0.1+10/src/java.base/share/native/libfdlibm/e_asin.c	2018-02-27 10:14:25.333456152 +1100
+--- openjdk-12.0.1+12/src/java.base/share/native/libfdlibm/e_asin.c	2018-02-27 10:08:25.589121957 +1100
++++ openjdk-12.0.1+12/src/java.base/share/native/libfdlibm/e_asin.c	2018-02-27 10:14:25.333456152 +1100
 @@ -99,10 +99,10 @@
                  if(huge+x>one) return x;/* return x with inexact if x!=0*/
              } else

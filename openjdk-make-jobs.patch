@@ -1,5 +1,5 @@
---- openjdk-jdk-10.0.1+10/make/InitSupport.gmk	2018-05-28 06:40:22.730037313 +0000
-+++ openjdk-jdk-10.0.1+10/make/InitSupport.gmk	2018-05-28 06:40:35.462027137 +0000
+--- openjdk-12.0.1+12/make/InitSupport.gmk	2018-05-28 06:40:22.730037313 +0000
++++ openjdk-12.0.1+12/make/InitSupport.gmk	2018-05-28 06:40:35.462027137 +0000
 @@ -112,10 +112,10 @@
      # This is a trick to get this rule to execute before any other rules
      # MAKEFLAGS only indicate -j if read in a recipe (!)

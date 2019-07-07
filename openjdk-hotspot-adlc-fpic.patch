@@ -1,5 +1,5 @@
---- openjdk-jdk-10.0.1+10/make/hotspot/gensrc/GensrcAdlc.gmk.orig	2018-06-21 06:56:50.758941786 +0000
-+++ openjdk-jdk-10.0.1+10/make/hotspot/gensrc/GensrcAdlc.gmk	2018-06-21 06:55:08.822945010 +0000
+--- openjdk-12.0.1+12/make/hotspot/gensrc/GensrcAdlc.gmk.orig	2018-06-21 06:56:50.758941786 +0000
++++ openjdk-12.0.1+12/make/hotspot/gensrc/GensrcAdlc.gmk	2018-06-21 06:55:08.822945010 +0000
 @@ -35,7 +35,7 @@
    # Flags depending on the build platform/tool chain
    # NOTE: No optimization or debug flags set here

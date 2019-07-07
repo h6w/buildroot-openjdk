@@ -1,5 +1,5 @@
---- openjdk-jdk-10.0.1+10/src/hotspot/os_cpu/linux_x86/linux_x86_32.s.orig	2018-10-09 01:27:45.048307289 +0000
-+++ openjdk-jdk-10.0.1+10/src/hotspot/os_cpu/linux_x86/linux_x86_32.s	2018-10-09 01:28:44.084982795 +0000
+--- openjdk-12.0.1+12/src/hotspot/os_cpu/linux_x86/linux_x86_32.s.orig	2018-10-09 01:27:45.048307289 +0000
++++ openjdk-12.0.1+12/src/hotspot/os_cpu/linux_x86/linux_x86_32.s	2018-10-09 01:28:44.084982795 +0000
 @@ -549,28 +549,28 @@
  3:      smovl # align to 8 bytes, we know we are 4 byte aligned to start
          subl     $1,%ecx

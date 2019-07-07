@@ -1,7 +1,7 @@
-Index: openjdk-jdk-10.0.1+10/src/java.desktop/unix/native/libawt_xawt/xawt/XToolkit.c
+Index: openjdk-12.0.1+12/src/java.desktop/unix/native/libawt_xawt/xawt/XToolkit.c
 ===================================================================
---- openjdk-jdk-10.0.1+10/src/java.desktop/unix/native/libawt_xawt/xawt/XToolkit.c	2010-08-05 16:45:56.607257503 +0200
-+++ openjdk-jdk-10.0.1+10/src/java.desktop/unix/native/libawt_xawt/xawt/XToolkit.c	2010-08-05 16:47:19.727254686 +0200
+--- openjdk-12.0.1+12/src/java.desktop/unix/native/libawt_xawt/xawt/XToolkit.c	2010-08-05 16:45:56.607257503 +0200
++++ openjdk-12.0.1+12/src/java.desktop/unix/native/libawt_xawt/xawt/XToolkit.c	2010-08-05 16:47:19.727254686 +0200
 @@ -27,9 +27,6 @@
  #include <X11/Xutil.h>
  #include <X11/Xos.h>

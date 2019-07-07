@@ -1,5 +1,5 @@
---- openjdk-jdk-10.0.1+10/make/lib/Lib-jdk.jdwp.agent.gmk.orig	2018-10-19 03:06:39.942275021 +0000
-+++ openjdk-jdk-10.0.1+10/make/lib/Lib-jdk.jdwp.agent.gmk	2018-10-19 03:08:01.419559667 +0000
+--- openjdk-12.0.1+12/make/lib/Lib-jdk.jdwp.agent.gmk.orig	2018-10-19 03:06:39.942275021 +0000
++++ openjdk-12.0.1+12/make/lib/Lib-jdk.jdwp.agent.gmk	2018-10-19 03:08:01.419559667 +0000
 @@ -85,7 +85,7 @@
      LDFLAGS := $(LDFLAGS_JDKLIB) \
          $(call SET_SHARED_LIBRARY_ORIGIN), \

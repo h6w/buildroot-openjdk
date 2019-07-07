@@ -1,7 +1,7 @@
-Index: openjdk-jdk-10.0.1+10/src/hotspot/os/linux/os_linux.cpp
+Index: openjdk-12.0.1+12/src/hotspot/os/linux/os_linux.cpp
 ===================================================================
---- openjdk-jdk-10.0.1+10/src/hotspot/os/linux/os_linux.cpp	2014-10-17 08:15:37.000000000 +1100
-+++ openjdk-jdk-10.0.1+10/src/hotspot/os/linux/os_linux.cpp	2017-08-22 12:51:45.380182197 +1000
+--- openjdk-12.0.1+12/src/hotspot/os/linux/os_linux.cpp	2014-10-17 08:15:37.000000000 +1100
++++ openjdk-12.0.1+12/src/hotspot/os/linux/os_linux.cpp	2017-08-22 12:51:45.380182197 +1000
 @@ -95,8 +95,10 @@
  # include <fcntl.h>
  # include <string.h>
