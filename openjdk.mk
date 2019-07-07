@@ -22,7 +22,6 @@ OPENJDK_CONF_OPTS = \
         --openjdk-target=$(GNU_TARGET_NAME) \
 	--with-sysroot=$(STAGING_DIR) \
 	--with-devkit=$(HOST_DIR) \
-	--disable-freetype-bundling \
 	--with-extra-cflags='-Os -Wno-maybe-uninitialized' \
         --with-x \
 	$(OPENJDK_GENERAL_OPTS)
