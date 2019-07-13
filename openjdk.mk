@@ -15,16 +15,27 @@ OPENJDK_SITE = https://hg.openjdk.java.net/$(OPENJDK_PROJECT)/$(OPENJDK_RELEASE)
 OPENJDK_LICENSE = GPLv2+ with exception
 OPENJDK_LICENSE_FILES = COPYING
 
-
 export DISABLE_HOTSPOT_OS_VERSION_CHECK=ok
 OPENJDK_CONF_OPTS = \
-        --with-debug-level=release \
         --openjdk-target=$(GNU_TARGET_NAME) \
-	--with-sysroot=$(STAGING_DIR) \
+        --with-boot-jdk=$(HOST_DIR) \
+        --with-debug-level=release \
 	--with-devkit=$(HOST_DIR) \
 	--with-extra-cflags='-Os -Wno-maybe-uninitialized' \
+	--with-sysroot=$(STAGING_DIR) \
         --with-x \
 	$(OPENJDK_GENERAL_OPTS)
+
+# If building for AArch64, use the provided CPU port.
+ifeq ($(BR2_aarch64),y)
+OPENJDK_CONF_OPTS += --with-abi-profile=aarch64
+endif
+
+ifeq ($(BR2_CCACHE),y)
+OPENJDK_CONF_OPTS += \
+	--enable-ccache \
+	--with-ccache-dir=$(BR2_CCACHE_DIR)
+endif
 	
 OPENJDK_MAKE_OPTS = \
 	$(OPENJDK_GENERAL_OPTS) \
@@ -47,7 +58,7 @@ OPENJDK_DEPENDENCIES = \
 
 define OPENJDK_CONFIGURE_CMDS
 	chmod +x $(@D)/configure
-	cd $(@D); ./configure $(OPENJDK_CONF_OPTS)
+	cd $(@D); ./configure autogen $(OPENJDK_CONF_OPTS)
 endef
 
 define OPENJDK_BUILD_CMDS
@@ -56,9 +67,8 @@ define OPENJDK_BUILD_CMDS
 endef
 
 define OPENJDK_INSTALL_TARGET_CMDS
-	mkdir -p $(TARGET_DIR)/usr/lib/jvm/
-	cp -aLrf $(@D)/build/*/images/* $(TARGET_DIR)/usr/lib/jvm/
-	cp -arf $(@D)/build/*/images/jdk/lib/$(OPENJDK_VARIANT)/libjvm.so $(TARGET_DIR)/usr/lib/jvm/lib/
+	cp -dpfr $(@D)/build/linux-*-release/images/jdk/bin/* $(TARGET_DIR)/usr/bin
+	cp -dpfr $(@D)/build/linux-*-release/images/jdk/lib/* $(TARGET_DIR)/usr/lib/
 endef
 
 #openjdk configure is not based on automake
