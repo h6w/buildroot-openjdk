@@ -32,6 +32,7 @@ OPENJDK_MAKE_OPTS = \
 
 OPENJDK_DEPENDENCIES = \
 	alsa-lib \
+	host-openjdk-bin \
 	host-pkgconf \
 	libffi \
 	cups \
