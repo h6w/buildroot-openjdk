@@ -15,7 +15,6 @@ OPENJDK_SITE = https://hg.openjdk.java.net/$(OPENJDK_PROJECT)/$(OPENJDK_RELEASE)
 OPENJDK_LICENSE = GPLv2+ with exception
 OPENJDK_LICENSE_FILES = COPYING
 
-
 export DISABLE_HOTSPOT_OS_VERSION_CHECK=ok
 
 OPENJDK_CONF_ENV = \
@@ -42,9 +41,6 @@ OPENJDK_CONF_OPTS = \
         --with-x \
 	$(OPENJDK_GENERAL_OPTS)
 
-
-#	--with-extra-cflags='-Os -Wno-maybe-uninitialized' \
-	
 OPENJDK_MAKE_OPTS = \
 	$(OPENJDK_GENERAL_OPTS) \
         images
@@ -52,6 +48,7 @@ OPENJDK_MAKE_OPTS = \
 OPENJDK_DEPENDENCIES = \
 	host-openjdk-bin \
 	alsa-lib \
+	host-openjdk-bin \
 	host-pkgconf \
 	libffi \
 	cups \
@@ -75,11 +72,8 @@ define OPENJDK_BUILD_CMDS
 endef
 
 define OPENJDK_INSTALL_TARGET_CMDS
-#	mkdir -p $(TARGET_DIR)/usr/lib/jvm/
-#	cp -aLrf $(@D)/build/*/images/* $(TARGET_DIR)/usr/lib/jvm/
 	cp -dpfr $(@D)/build/linux-*-release/images/jre/bin/* $(TARGET_DIR)/usr/bin/
 	cp -dpfr $(@D)/build/linux-*-release/images/jre/lib/* $(TARGET_DIR)/usr/lib/
-#	cp -arf $(@D)/build/*/images/jre/lib/$(OPENJDK_VARIANT)/libjvm.so $(TARGET_DIR)/usr/lib/jvm/lib/
 endef
 
 #openjdk configure is not based on automake
