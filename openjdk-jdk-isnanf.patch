@@ -1,4 +1,4 @@
---- openjdk-12.0.1+12/src/java.base/unix/native/libjava/jdk_util_md.h.orig	2017-11-30 21:41:18.780720828 +1100
+--- openjdk-12.0.1+12/src/java.base/unix/native/libjava/jdk_util_md.h	2017-11-30 21:41:18.780720828 +1100
 +++ openjdk-12.0.1+12/src/java.base/unix/native/libjava/jdk_util_md.h	2017-11-30 21:43:07.698579220 +1100
 @@ -37,7 +37,7 @@
  #define ISNAND(d) isnan(d)

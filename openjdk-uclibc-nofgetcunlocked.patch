@@ -1,0 +1,17 @@
+--- openjdk-12.0.1+12/src/hotspot/share/runtime/os.hpp	2019-08-09 21:24:54.232248977 +1000
++++ openjdk-12.0.1+12/src/hotspot/share/runtime/os.hpp	2019-08-09 21:33:59.782416527 +1000
+@@ -40,6 +40,14 @@
+ # include <mach/mach_time.h>
+ #endif
+ 
++#ifdef __UCLIBC__
++// no __fgetc_unlocked in uclibc so just call __fgetc
++inline int __fgetc_unlocked(FILE *stream) { return fgetc(stream); }
++inline int __fputc_unlocked(int c, FILE *stream) { return fputc(c,stream); }
++#endif
++
++
++
+ class AgentLibrary;
+ class frame;
+ 
