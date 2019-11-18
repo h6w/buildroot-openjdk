@@ -36,8 +36,8 @@ OPENJDK_CONF_OPTS = \
 	--with-sysroot=$(STAGING_DIR) \
 	--with-boot-jdk=$(HOST_DIR) \
 	--with-devkit=$(HOST_DIR) \
-	--with-extra-cflags="$(TARGET_CFLAGS)" \
-	--with-extra-cxxflags="$(TARGET_CXXFLAGS)" \
+	--with-extra-cflags="$(TARGET_CFLAGS) -fno-stack-protector" \
+	--with-extra-cxxflags="$(TARGET_CXXFLAGS) -fno-stack-protector" \
         --with-x \
 	$(OPENJDK_GENERAL_OPTS)
 
