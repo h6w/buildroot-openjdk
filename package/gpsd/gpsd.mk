@@ -4,9 +4,9 @@
 #
 ################################################################################
 
-GPSD_VERSION = 3.18
+GPSD_VERSION = 3.19
 GPSD_SITE = http://download-mirror.savannah.gnu.org/releases/gpsd
-GPSD_LICENSE = BSD-3-Clause
+GPSD_LICENSE = BSD-2-Clause
 GPSD_LICENSE_FILES = COPYING
 GPSD_INSTALL_STAGING = YES
 
@@ -18,13 +18,15 @@ GPSD_CFLAGS = $(TARGET_CFLAGS)
 GPSD_SCONS_ENV = $(TARGET_CONFIGURE_OPTS)
 
 GPSD_SCONS_OPTS = \
-	arch=$(ARCH)\
+	arch=$(ARCH) \
 	manbuild=no \
-	prefix=/usr\
-	sysroot=$(STAGING_DIR)\
-	strip=no\
+	prefix=/usr \
+	sysroot=$(STAGING_DIR) \
+	strip=no \
 	python=no \
-	qt=no
+	qt=no \
+	ntpshm=yes \
+	systemd=$(if $(BR2_INIT_SYSTEMD),yes,no)
 
 ifeq ($(BR2_PACKAGE_NCURSES),y)
 GPSD_DEPENDENCIES += ncurses
@@ -42,10 +44,7 @@ else
 GPSD_SCONS_OPTS += libgpsmm=no
 endif
 
-# prevents from triggering GCC ICE
-# A bug was reported to the gcc bug tracker:
-# https://gcc.gnu.org/bugzilla/show_bug.cgi?id=68485
-ifeq ($(BR2_microblaze),y)
+ifeq ($(BR2_TOOLCHAIN_HAS_GCC_BUG_68485),y)
 GPSD_CFLAGS += -O0
 endif
 
@@ -144,6 +143,9 @@ endif
 ifneq ($(BR2_PACKAGE_GPSD_SIRF),y)
 GPSD_SCONS_OPTS += sirf=no
 endif
+ifneq ($(BR2_PACKAGE_GPSD_SKYTRAQ),y)
+GPSD_SCONS_OPTS += skytraq=no
+endif
 ifneq ($(BR2_PACKAGE_GPSD_SUPERSTAR2),y)
 GPSD_SCONS_OPTS += superstar2=no
 endif
@@ -161,9 +163,6 @@ GPSD_SCONS_OPTS += ublox=no
 endif
 
 # Features
-ifneq ($(BR2_PACKAGE_GPSD_NTP_SHM),y)
-GPSD_SCONS_OPTS += ntpshm=no
-endif
 ifneq ($(BR2_PACKAGE_GPSD_PPS),y)
 GPSD_SCONS_OPTS += pps=no
 endif
@@ -216,12 +215,20 @@ define GPSD_INSTALL_TARGET_CMDS
 		DESTDIR=$(TARGET_DIR) \
 		$(HOST_DIR)/bin/python2 $(SCONS) \
 		$(GPSD_SCONS_OPTS) \
-		install)
+		$(if $(BR2_PACKAGE_HAS_UDEV),udev-install,install))
 endef
 
 define GPSD_INSTALL_INIT_SYSV
 	$(INSTALL) -m 0755 -D package/gpsd/S50gpsd $(TARGET_DIR)/etc/init.d/S50gpsd
 	$(SED) 's,^DEVICES=.*,DEVICES=$(BR2_PACKAGE_GPSD_DEVICES),' $(TARGET_DIR)/etc/init.d/S50gpsd
+endef
+
+# systemd unit files are installed automatically, but need to update the
+# /usr/local path references in the provided files to /usr.
+define GPSD_INSTALL_INIT_SYSTEMD
+	$(SED) 's%/usr/local%/usr%' \
+		$(TARGET_DIR)/usr/lib/systemd/system/gpsd.service \
+		$(TARGET_DIR)/usr/lib/systemd/system/gpsdctl@.service
 endef
 
 define GPSD_INSTALL_STAGING_CMDS
@@ -233,16 +240,10 @@ define GPSD_INSTALL_STAGING_CMDS
 		install)
 endef
 
-# After installing the udev rule, make it writable so that this
+# After the udev rule is installed, make it writable so that this
 # package can be re-built/re-installed.
 ifeq ($(BR2_PACKAGE_HAS_UDEV),y)
 define GPSD_INSTALL_UDEV_RULES
-	(cd $(@D); \
-		$(GPSD_SCONS_ENV) \
-		DESTDIR=$(TARGET_DIR) \
-		$(HOST_DIR)/bin/python2 $(SCONS) \
-		$(GPSD_SCONS_OPTS) \
-		udev-install)
 	chmod u+w $(TARGET_DIR)/lib/udev/rules.d/25-gpsd.rules
 endef
 
