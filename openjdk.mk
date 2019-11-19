@@ -82,6 +82,7 @@ endef
 define OPENJDK_INSTALL_TARGET_CMDS
 	cp -dpfr $(@D)/build/linux-*-release/images/jre/bin/* $(TARGET_DIR)/usr/bin/
 	cp -dpfr $(@D)/build/linux-*-release/images/jre/lib/* $(TARGET_DIR)/usr/lib/
+	echo 'LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/server' >> $(TARGET_DIR)/etc/environment
 endef
 
 #openjdk configure is not based on automake
