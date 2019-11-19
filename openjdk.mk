@@ -55,6 +55,7 @@ OPENJDK_MAKE_OPTS = \
 
 OPENJDK_DEPENDENCIES = \
 	host-openjdk-bin \
+	host-zip \
 	alsa-lib \
 	host-openjdk-bin \
 	host-pkgconf \
