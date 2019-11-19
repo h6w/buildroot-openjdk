@@ -14,6 +14,8 @@ OPENJDK_SOURCE = jdk-$(OPENJDK_VERSION).tar.gz
 OPENJDK_SITE = https://hg.openjdk.java.net/$(OPENJDK_PROJECT)/$(OPENJDK_RELEASE)/archive
 OPENJDK_LICENSE = GPLv2+ with exception
 OPENJDK_LICENSE_FILES = COPYING
+OPENJDK_EXTRA_CFLAGS = "$(TARGET_CFLAGS)"
+OPENJDK_EXTRA_CXXFLAGS = "$(TARGET_CXXFLAGS)"
 
 export DISABLE_HOTSPOT_OS_VERSION_CHECK=ok
 
@@ -26,6 +28,12 @@ OPENJDK_CONF_ENV = \
 	BUILD_SYSROOT_CFLAGS="$(HOST_CFLAGS)" \
 	BUILD_SYSROOT_LDFLAGS="$(HOST_LDFLAGS)"
 
+
+ifeq ($(BR2_TOOLCHAIN_USES_UCLIBC),y)
+	OPENJDK_EXTRA_CFLAGS += -fno-stack-protector
+	OPENJDK_EXTRA_CXXFLAGS += -fno-stack-protector
+endif
+
 OPENJDK_CONF_OPTS = \
 	--disable-full-docs \
 	--disable-hotspot-gtest \
@@ -36,8 +44,8 @@ OPENJDK_CONF_OPTS = \
 	--with-sysroot=$(STAGING_DIR) \
 	--with-boot-jdk=$(HOST_DIR) \
 	--with-devkit=$(HOST_DIR) \
-	--with-extra-cflags="$(TARGET_CFLAGS) -fno-stack-protector" \
-	--with-extra-cxxflags="$(TARGET_CXXFLAGS) -fno-stack-protector" \
+	--with-extra-cflags="$(OPENJDK_EXTRA_CFLAGS)" \
+	--with-extra-cxxflags="$(OPENJDK_EXTRA_CXXFLAGS)" \
         --with-x \
 	$(OPENJDK_GENERAL_OPTS)
 
