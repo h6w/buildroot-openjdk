@@ -1,4 +1,0 @@
-[submodule "package/openjdk"]
-	path = package/openjdk
-	url = https://github.com/h6w/buildroot-openjdk
-	branch = master
