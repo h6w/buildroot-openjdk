@@ -1,4 +1,4 @@
---- openjdk-12.0.1+12/src/java.desktop/share/native/libjavajpeg/jdphuff.c.orig	2018-05-15 07:04:10.272822750 +0000
+--- openjdk-12.0.1+12/src/java.desktop/share/native/libjavajpeg/jdphuff.c	2018-05-15 07:04:10.272822750 +0000
 +++ openjdk-12.0.1+12/src/java.desktop/share/native/libjavajpeg/jdphuff.c	2018-05-15 23:35:04.923841195 +0000
 @@ -202,9 +202,11 @@
   * On some machines, a shift and add will be faster than a table lookup.
