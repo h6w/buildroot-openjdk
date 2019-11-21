@@ -1,0 +1,11 @@
+--- openjdk-12.0.1+12/make/hotspot/gensrc/GensrcAdlc.gmk.orig	2018-06-21 06:56:50.758941786 +0000
++++ openjdk-12.0.1+12/make/hotspot/gensrc/GensrcAdlc.gmk	2018-06-21 06:55:08.822945010 +0000
+@@ -35,7 +35,7 @@
+   # Flags depending on the build platform/tool chain
+   # NOTE: No optimization or debug flags set here
+   ifeq ($(OPENJDK_BUILD_OS), linux)
+-    ADLC_CFLAGS := -fno-exceptions -DLINUX
++    ADLC_CFLAGS := -fno-exceptions -DLINUX -no-pie -fPIC
+   else ifeq ($(OPENJDK_BUILD_OS), solaris)
+     ADLC_LDFLAGS := -m64
+     ADLC_CFLAGS := -m64

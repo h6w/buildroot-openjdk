@@ -1,0 +1,53 @@
+--- openjdk-12.0.1+12/src/hotspot/os_cpu/linux_x86/linux_x86_32.s.orig	2018-10-09 01:27:45.048307289 +0000
++++ openjdk-12.0.1+12/src/hotspot/os_cpu/linux_x86/linux_x86_32.s	2018-10-09 01:28:44.084982795 +0000
+@@ -549,28 +549,28 @@
+ 3:      smovl # align to 8 bytes, we know we are 4 byte aligned to start
+         subl     $1,%ecx
+ 4:      .p2align 4,,15
+-        movq     0(%esi),%mm0
+-        addl     $64,%edi
+-        movq     8(%esi),%mm1
+-        subl     $16,%ecx
+-        movq     16(%esi),%mm2
+-        movq     %mm0,-64(%edi)
+-        movq     24(%esi),%mm0
+-        movq     %mm1,-56(%edi)
+-        movq     32(%esi),%mm1
+-        movq     %mm2,-48(%edi)
+-        movq     40(%esi),%mm2
+-        movq     %mm0,-40(%edi)
+-        movq     48(%esi),%mm0
+-        movq     %mm1,-32(%edi)
+-        movq     56(%esi),%mm1
+-        movq     %mm2,-24(%edi)
+-        movq     %mm0,-16(%edi)
+-        addl     $64,%esi
+-        movq     %mm1,-8(%edi)
+-        cmpl     $16,%ecx
+-        jge      4b
+-        emms
++#        movq     0(%esi),%mm0
++#        addl     $64,%edi
++#        movq     8(%esi),%mm1
++#        subl     $16,%ecx
++#        movq     16(%esi),%mm2
++#        movq     %mm0,-64(%edi)
++#        movq     24(%esi),%mm0
++#        movq     %mm1,-56(%edi)
++#        movq     32(%esi),%mm1
++#        movq     %mm2,-48(%edi)
++#        movq     40(%esi),%mm2
++#        movq     %mm0,-40(%edi)
++#        movq     48(%esi),%mm0
++#        movq     %mm1,-32(%edi)
++#        movq     56(%esi),%mm1
++#        movq     %mm2,-24(%edi)
++#        movq     %mm0,-16(%edi)
++#        addl     $64,%esi
++#        movq     %mm1,-8(%edi)
++#        cmpl     $16,%ecx
++#        jge      4b
++#        emms
+ 	testl    %ecx,%ecx
+ 	ja       1b
+ 5:      andl     $1,%eax

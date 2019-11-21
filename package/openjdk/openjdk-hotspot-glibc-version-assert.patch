@@ -1,0 +1,22 @@
+--- openjdk-12.0.1+12/src/hotspot/os/linux/os_linux.cpp.orig	2018-07-16 07:10:02.962294766 +0000
++++ openjdk-12.0.1+12/src/hotspot/os/linux/os_linux.cpp	2018-07-16 07:11:35.635970832 +0000
+@@ -530,11 +530,17 @@
+   #error "glibc too old (< 2.3.2)"
+ #endif
+ 
+-  size_t n = confstr(_CS_GNU_LIBC_VERSION, NULL, 0);
++size_t n;
++char *str;
++#if !defined(__UCLIBC__)
++  n = confstr(_CS_GNU_LIBC_VERSION, NULL, 0);
+   assert(n > 0, "cannot retrieve glibc version");
+-  char *str = (char *)malloc(n, mtInternal);
++  str = (char *)malloc(n, mtInternal);
+   confstr(_CS_GNU_LIBC_VERSION, str, n);
+   os::Linux::set_glibc_version(str);
++#else
++  os::Linux::set_glibc_version("9.9.9");
++#endif
+ 
+   n = confstr(_CS_GNU_LIBPTHREAD_VERSION, NULL, 0);
+   assert(n > 0, "cannot retrieve pthread version");

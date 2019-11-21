@@ -1,0 +1,10 @@
+--- package/Config.in.orig	2017-12-21 04:52:57.281523541 +0000
++++ package/Config.in	2017-12-21 04:56:27.812481488 +0000
+@@ -639,6 +639,7 @@
+ endmenu
+ endif
+ 	source "package/nodejs/Config.in"
++	source "package/openjdk/Config.in"
+ 	source "package/perl/Config.in"
+ if BR2_PACKAGE_PERL
+ menu "Perl libraries/modules"

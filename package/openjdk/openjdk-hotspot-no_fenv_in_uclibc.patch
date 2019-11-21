@@ -1,0 +1,51 @@
+--- openjdk-12.0.1+12/src/hotspot/share/opto/loopPredicate.cpp	2019-07-07 21:13:18.806688904 +1000
++++ openjdk-12.0.1+12/src/hotspot/share/opto/loopPredicate.cpp	2019-07-07 21:30:31.957667642 +1000
+@@ -947,7 +947,9 @@
+ 
+   void set_rounding(int mode) {
+     // fesetround is broken on windows
++#ifndef __UCLIBC__
+     NOT_WINDOWS(fesetround(mode);)
++#endif
+   }
+ 
+   void check_frequency(float f) {
+@@ -961,7 +963,9 @@
+ 
+   float to(Node* n) {
+     // post order walk on the CFG graph from n to _dom
++#ifndef __UCLIBC__
+     set_rounding(FE_TOWARDZERO); // make sure rounding doesn't push frequency above 1
++#endif
+     IdealLoopTree* loop = _phase->get_loop(_dom);
+     Node* c = n;
+     for (;;) {
+@@ -988,14 +992,18 @@
+                 inner_head = inner_loop->_head->as_Loop();
+                 inner_head->verify_strip_mined(1);
+               }
++#ifndef __UCLIBC__
+               set_rounding(FE_UPWARD);  // make sure rounding doesn't push frequency above 1
++#endif
+               float loop_exit_cnt = 0.0f;
+               for (uint i = 0; i < inner_loop->_body.size(); i++) {
+                 Node *n = inner_loop->_body[i];
+                 float c = inner_loop->compute_profile_trip_cnt_helper(n);
+                 loop_exit_cnt += c;
+               }
++#ifndef __UCLIBC__
+               set_rounding(FE_TOWARDZERO);
++#endif
+               float cnt = -1;
+               if (n->in(0)->is_If()) {
+                 IfNode* iff = n->in(0)->as_If();
+@@ -1051,7 +1059,9 @@
+           }
+         }
+         if (_stack.size() == 0) {
++#ifndef __UCLIBC__
+           set_rounding(FE_TONEAREST);
++#endif
+           check_frequency(f);
+           return f;
+         }
