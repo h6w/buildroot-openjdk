@@ -17,20 +17,30 @@ config BR2_PACKAGE_OPENJDK
 	bool "openjdk"
 	depends on BR2_PACKAGE_HOST_OPENJDK_BIN_ARCH_SUPPORTS
 	depends on BR2_PACKAGE_OPENJDK_ARCH_SUPPORTS
+	depends on BR2_PACKAGE_XORG7
 	depends on BR2_TOOLCHAIN_HAS_THREADS
 	select BR2_PACKAGE_HOST_ZIP
 	select BR2_PACKAGE_LIBUSB
 	select BR2_PACKAGE_ALSA_LIB
+	select BR2_PACKAGE_ALSA_LIB_MIXER
+	select BR2_PACKAGE_ALSA_LIB_PCM
+	select BR2_PACKAGE_ALSA_LIB_RAWMIDI
+	select BR2_PACKAGE_ALSA_LIB_SEQ
 	select BR2_PACKAGE_LIBGTK2
 	select BR2_PACKAGE_CUPS
+	select BR2_PACKAGE_FONTCONFIG
 	select BR2_PACKAGE_GIFLIB
 	select BR2_PACKAGE_JPEG
+	select BR2_PACKAGE_LCMS2
+	select BR2_PACKAGE_LIBPNG
+	select BR2_PACKAGE_
 	select BR2_PACKAGE_XLIB_LIBXT
 	select BR2_PACKAGE_XLIB_LIBXTST
 	select BR2_PACKAGE_ELFUTILS
 	select BR2_PACKAGE_BUILDROOT_LOCALE
 	select BR2_PTHREAD_DEBUG
 	help
-	  OpenJDK JRE runtime.
+          OpenJDK is a free and open-source implementation of the
+          Java Platform.
 
 	  http://openjdk.java.net/
