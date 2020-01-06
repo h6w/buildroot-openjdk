@@ -3,6 +3,8 @@ config BR2_TARGET_UBOOT
 	help
 	  Build "Das U-Boot" Boot Monitor
 
+	  https://www.denx.de/wiki/U-Boot
+
 if BR2_TARGET_UBOOT
 choice
 	prompt "Build system"
@@ -224,6 +226,9 @@ config BR2_TARGET_UBOOT_FORMAT_DTB_IMX
 
 config BR2_TARGET_UBOOT_FORMAT_IMG
 	bool "u-boot.img"
+
+config BR2_TARGET_UBOOT_FORMAT_ITB
+	bool "u-boot.itb"
 
 config BR2_TARGET_UBOOT_FORMAT_IMX
 	bool "u-boot.imx"
